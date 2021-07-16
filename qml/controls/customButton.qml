@@ -30,7 +30,6 @@ Button{
             id:backgroundBtn
             color:internal.dynamicColor
             radius: 10
-
             Image {
                 id: iconBtn
                 source: iconSource
@@ -42,6 +41,8 @@ Button{
             }
 
             ColorOverlay{
+                width: 50
+                height: 50
                 anchors.fill: iconBtn
                 source: iconBtn
                 color: "#ffffff"
@@ -53,6 +54,6 @@ Button{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:1.33;height:50;width:50}
+    D{i:0;autoSize:true;formeditorZoom:1.33;height:60;width:60}
 }
 ##^##*/

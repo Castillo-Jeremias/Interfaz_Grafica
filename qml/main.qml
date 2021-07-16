@@ -1,7 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
-import QtGraphicalEffects 1.0
+import QtGraphicalEffects 1.15
 
 import "controls"
 
@@ -11,9 +11,10 @@ Window {
     color: "#00000000"
     title: "mainWindow"
 
-    height: 600
+    height: 700
     width: 1300
-
+    minimumHeight: 700
+    minimumWidth:  1300
     // Removemos bordes de de aplicación deWindows
     flags: Qt.Window | Qt.FramelessWindowHint
 
@@ -24,17 +25,37 @@ Window {
     // Funciones internas
     QtObject{
         id:internal
+        function resetResize(){
+            // Visibilidad de los ajustes de ventana
+            resizeLeft.visible = true
+            resizeRight.visible = true
+            resizeBottom.visible = true
+            resizeDiagDrchaInf.visible = true
+        }
 
         function maximazeRestore(){
             if(windowStatus == 0){
                 mainwindow.showMaximized()
                 windowStatus = 1
                 windowMargin = 0
+
+                // Visibilidad de los ajustes de ventana
+                resizeLeft.visible = false
+                resizeRight.visible = false
+                resizeBottom.visible = false
+                resizeDiagDrchaInf.visible = false
+
+                // Cambio de icono de maximizado
                 maximizeButton.iconSource = "../images/svg_images/restore_icon.svg"
             }else{
                 mainwindow.showNormal()
                 windowStatus = 0
                 windowMargin = 10
+
+                // Visibilidad de los ajustes de ventana
+                internal.resetResize()
+
+                // Cambio de icono de maximizado
                 maximizeButton.iconSource = "../images/svg_images/maximize_icon.svg"
             }
         }
@@ -44,6 +65,7 @@ Window {
                 mainwindow.showNormal()
                 windowStatus = 0
                 windowMargin = 10
+                // Cambio de icono de maximizado
                 maximizeButton.iconSource = "../images/svg_images/maximize_icon.svg"
             }
         }
@@ -53,7 +75,16 @@ Window {
             windowMargin = 10
             maximizeButton.iconSource = "../images/svg_images/maximize_icon.svg"
         }
+
+        function disableButtonsMenu(){
+            btnHome.isActiveMenu = false
+            btnSettings.isActiveMenu = false
+            btnManual.isActiveMenu = false
+            btnTracking.isActiveMenu = false
+        }
     }
+
+
 
     Rectangle {
         z:1     // Se generaba un bug que no podiamos ver la interfaz en editor
@@ -81,12 +112,11 @@ Window {
             anchors.bottomMargin: 1
             anchors.topMargin: 1
 
-
             Rectangle {
                 id: topBar
                 width: 780
                 height: 50
-                color: "#232323"
+                color: "#222222"
                 border.width: 0
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -229,10 +259,10 @@ Window {
                 LogoFceia {
                     height: 60
                     anchors.right: parent.right
-                    anchors.rightMargin: 3
-                    anchors.leftMargin: 3
-                    anchors.topMargin: 3
-                    anchors.bottomMargin: 3
+                    anchors.rightMargin: 5
+                    anchors.leftMargin: 5
+                    anchors.topMargin: 5
+                    anchors.bottomMargin: 5
 
                 }
 
@@ -277,71 +307,101 @@ Window {
                         easing.type:  Easing.InOutQuint
                     }
 
-                    LeftMenuButton {
-                        id: btnSetting
-                        x: 0
-                        y: 180
-                        text: qsTr("Setting")
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 0
-                        iconSource: "../images/svg_images/settings_icon.svg"
-                    }
+
 
                     Column {
-                        id: columnaMenu
-                        width: 60
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.rightMargin: 0
-                        anchors.leftMargin: 0
-                        anchors.bottomMargin: 0
+                        id: column
+                        anchors.fill: parent
                         anchors.topMargin: 0
+                        anchors.bottomMargin: 60
+                        clip: true
 
-                        CustomButton {
-                            id: toggleButton
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 468
-                            anchors.rightMargin: 0
-                            anchors.leftMargin: 0
-                            anchors.topMargin: 0
-                            btnMouseOver: "#282d35"
-                            btnDefault: "#212121"
-                            onClicked: animationLeftMenu.running = true
-
-                        }
 
                         LeftMenuButton {
-                            id:btnSave
-                            text: qsTr("Save")
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.leftMargin: 0
-                            iconSource: "../images/svg_images/save_icon.svg"
-                            anchors.topMargin: 180
-                        }
+                            id: btnMenu
+                            text: qsTr(" ")
+                            iconSource: "../../../../Qt_Python_Interfaz/images/svg_images/menu_icon.svg"
+                            iconHeigh: 30
+                            layer.textureMirroring: ShaderEffectSource.MirrorVertically
+                            iconWidth: 30
 
-                        LeftMenuButton {
-                            id: btnOpenFile
-                            text: qsTr("Open File")
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.leftMargin: 0
-                            iconSource: "../images/svg_images/open_icon.svg"
-                            anchors.topMargin: 120
+                            onClicked:{
+                                animationLeftMenu.running = true
+                            }
                         }
 
                         LeftMenuButton {
                             id: btnHome
+                            width: leftBar.width
                             text: qsTr("Home")
-                            anchors.top: parent.top
-                            anchors.topMargin: 60
+                            isActiveMenu: true
+                            iconWidth: 30
+                            iconHeigh: 30
+                            layer.textureMirroring: ShaderEffectSource.MirrorVertically
+                            onClicked: {
+                                btnHome.isActiveMenu = true
+                                btnSettings.isActiveMenu = false
+                                btnManual.isActiveMenu = false
+                                btnTracking.isActiveMenu = false
+                                stackView.push(Qt.resolvedUrl("pages/HomePage.qml"))
+                            }
+                        }
+
+                        LeftMenuButton {
+                            id: btnManual
+                            x: 0
+                            y: 60
+                            width: leftBar.width
+                            text: qsTr("Modo Manual")
+                            iconHeigh: 30
+                            iconWidth: 25
+                            layer.textureMirroring: ShaderEffectSource.MirrorVertically
+                            iconSource: "../images/svg_images/Mano.png"
+                            onClicked: {
+                                internal.disableButtonsMenu()
+                                btnManual.isActiveMenu = true
+                                stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"))
+                            }
+                        }
+
+                        LeftMenuButton {
+                            id: btnTracking
+                            x: 0
+                            y: 60
+                            width: leftBar.width
+                            text: qsTr("Modo Tracking")
+                            iconWidth: 25
+                            iconHeigh: 30
+                            layer.textureMirroring: ShaderEffectSource.MirrorVertically
+                            iconSource: "../images/svg_images/Antena.png"
+
+                            onClicked: {
+                                internal.disableButtonsMenu()
+                                btnTracking.isActiveMenu = true
+                                stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"))
+                            }
+                        }
+
+
+                    }
+
+                    LeftMenuButton {
+                        id: btnSettings
+                        y: 485
+                        width: leftBar.width
+                        text: qsTr("Setting")
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.leftMargin: 0
+                        anchors.bottomMargin: 20
+                        iconSource: "../images/svg_images/settings_icon.svg"
+                        onClicked: {
+                            internal.disableButtonsMenu()
+                            btnSettings.isActiveMenu = true
+                            stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"))
                         }
                     }
+
 
 
                 }
@@ -353,8 +413,15 @@ Window {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
+                    clip: true
                     anchors.bottomMargin: 20
                     anchors.leftMargin: 0
+
+                    StackView {
+                        id: stackView
+                        anchors.fill: parent
+                        initialItem: Qt.resolvedUrl("pages/HomePage.qml")
+                    }
                 }
 
                 Rectangle {
@@ -368,7 +435,60 @@ Window {
                     anchors.leftMargin: 0
                     anchors.bottomMargin: 0
                     anchors.topMargin: 0
+
+                    Label {
+                        id: label
+                        x: 1080
+                        y: 4
+                        width: 400
+                        height: 30
+                        color: "#ffffff"
+                        text: qsTr("Desarrollado por: Sebastían C. Biagiola; Campero, Gustavo; Castillo Jeremías")
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.rightMargin: 20
+                    }
                 }
+            }
+
+            MouseArea {
+                id: resizeDiagDrchaInf
+                x: 1264
+                y: 664
+                width: 25
+                height: 25
+                opacity: 0.5
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+                cursorShape: Qt.SizeFDiagCursor
+
+                Image {
+                    id: imageResize
+                    width: 30
+                    height: 30
+                    anchors.fill: parent
+                    source: "../../../../Qt_Python_Interfaz/images/svg_images/resize_icon.svg"
+                    anchors.leftMargin: 8
+                    sourceSize.height: 16
+                    sourceSize.width: 16
+                    anchors.topMargin: 8
+                    fillMode: Image.PreserveAspectFit
+                    antialiasing: false
+                }
+
+                DragHandler{
+                    target: null
+                    onActiveChanged:{
+                        if(active){
+                            mainwindow.startSystemResize(Qt.RightEdge | Qt.BottomEdge)
+                        }
+                    }
+                }
+
             }
 
         }
@@ -384,10 +504,86 @@ Window {
         source: backGround
         z:0
     }
+
+    MouseArea {
+        id: resizeLeft
+        width: 10
+        height: 741
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+        anchors.topMargin: 10
+        anchors.leftMargin: 0
+        cursorShape: Qt.SizeHorCursor
+        DragHandler{
+            target: null
+            onActiveChanged:{
+                if(active){
+                    mainwindow.startSystemResize(Qt.LeftEdge)
+                }
+            }
+        }
+    }
+
+    MouseArea {
+        id: resizeRight
+        x: 1289
+        width: 10
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 10
+        anchors.topMargin: 10
+        anchors.rightMargin: 0
+        cursorShape: Qt.SizeHorCursor
+
+        DragHandler{
+            target: null
+            onActiveChanged:{
+                if(active){
+                    mainwindow.startSystemResize(Qt.RightEdge)
+                }
+            }
+        }
+    }
+
+    MouseArea {
+        id: resizeBottom
+        y: 690
+        height: 10
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 10
+        anchors.leftMargin: 10
+        anchors.bottomMargin: 0
+        cursorShape: Qt.SizeVerCursor
+
+        DragHandler{
+            target: null
+            onActiveChanged:{
+                if(active){
+                    mainwindow.startSystemResize(Qt.BottomEdge)
+                }
+            }
+        }
+    }
+
 }
+
+
+
+
+
+
+
+
+
+
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.9}
+    D{i:0;formeditorZoom:0.5}D{i:22}
 }
 ##^##*/

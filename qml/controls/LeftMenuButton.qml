@@ -18,16 +18,18 @@ Button{
 
     property color activeMenuColorLeft: "#55aaff"
     property color activeMenuColorRight: "#2c313c"
-    property bool isActiveMenu: true
+    property color buttonPush: "#2a2a2a"
+    property int  ancho_altoRectPush: 5
+    property bool isActiveMenu: false
 
     QtObject{
         id:internal
         property var dynamicColor:
             if(btnLeftMenu.down){
                 btnLeftMenu.down ? btnColorClicked : btnDefault
-             }else{
+            }else{
                 btnLeftMenu.hovered ? btnMouseOver: btnDefault
-             }
+            }
     }
 
 
@@ -52,10 +54,42 @@ Button{
                     right: parent.right
                     bottom: parent.bottom
                 }
-                color: activeMenuColorRight
-                width: 10
+                color: buttonPush
+                width: ancho_altoRectPush
                 visible: isActiveMenu
             }
+
+            Rectangle{
+                height: ancho_altoRectPush
+                visible: isActiveMenu
+                color: buttonPush
+
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
+                }
+
+                anchors.rightMargin: 0
+                anchors.leftMargin: 3
+                anchors.bottomMargin: 0
+            }
+            Rectangle{
+                height: ancho_altoRectPush
+                visible: isActiveMenu
+                color: buttonPush
+
+                anchors{
+                    left: parent.left
+                    right: parent.right
+                    top: parent.top
+                }
+
+                anchors.topMargin: 0
+                anchors.rightMargin: 0
+                anchors.leftMargin: 3
+            }
+
     }
 
     contentItem: Item{
@@ -65,7 +99,7 @@ Button{
                 id: btnIcon
                 source: iconSource
 
-                anchors.leftMargin: 20
+                anchors.leftMargin: 15
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -107,6 +141,6 @@ Button{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:1.66;height:60;width:200}
+    D{i:0;autoSize:true;formeditorZoom:2;height:60;width:200}D{i:5}
 }
 ##^##*/
