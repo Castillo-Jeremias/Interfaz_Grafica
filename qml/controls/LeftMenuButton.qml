@@ -95,7 +95,8 @@ Button{
     contentItem: Item{
         id: content
         anchors.fill: parent
-            Image {
+
+        Image {
                 id: btnIcon
                 source: iconSource
 
@@ -141,6 +142,6 @@ Button{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:2;height:60;width:200}D{i:5}
+    D{i:0;autoSize:true;formeditorZoom:2;height:60;width:200}
 }
 ##^##*/

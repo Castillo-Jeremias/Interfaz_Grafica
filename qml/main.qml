@@ -320,7 +320,7 @@ Window {
                         LeftMenuButton {
                             id: btnMenu
                             text: qsTr(" ")
-                            iconSource: "../../../../Qt_Python_Interfaz/images/svg_images/menu_icon.svg"
+                            iconSource: "../images/svg_images/menu_icon.svg"
                             iconHeigh: 30
                             layer.textureMirroring: ShaderEffectSource.MirrorVertically
                             iconWidth: 30
@@ -356,7 +356,7 @@ Window {
                             iconHeigh: 30
                             iconWidth: 25
                             layer.textureMirroring: ShaderEffectSource.MirrorVertically
-                            iconSource: "../images/svg_images/Mano.png"
+                            iconSource: "../images/svg_images/icons8-manual-24.png"
                             onClicked: {
                                 internal.disableButtonsMenu()
                                 btnManual.isActiveMenu = true
@@ -401,9 +401,6 @@ Window {
                             stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"))
                         }
                     }
-
-
-
                 }
 
                 Rectangle {
@@ -419,8 +416,12 @@ Window {
 
                     StackView {
                         id: stackView
+                        height: parent.fill
+                        width: parent.fill
                         anchors.fill: parent
+                        anchors.centerIn: parent
                         initialItem: Qt.resolvedUrl("pages/HomePage.qml")
+
                     }
                 }
 
@@ -471,7 +472,7 @@ Window {
                     width: 30
                     height: 30
                     anchors.fill: parent
-                    source: "../../../../Qt_Python_Interfaz/images/svg_images/resize_icon.svg"
+                    source: "../images/svg_images/resize_icon.svg"
                     anchors.leftMargin: 8
                     sourceSize.height: 16
                     sourceSize.width: 16
@@ -584,6 +585,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5}D{i:22}
+    D{i:0;formeditorZoom:0.5}
 }
 ##^##*/
