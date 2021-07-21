@@ -3,9 +3,9 @@ import QtQuick.Controls 2.15
 import "../controls"
 import Qt.labs.calendar 1.0
 
-Item {
+Page{
     property color colorBgComando : "#c00"
-    id: item1
+    id: trackingpage
     implicitHeight: 1218
     implicitWidth: 608
 
@@ -110,6 +110,6 @@ Item {
 
 /*##^##
 Designer {
-    D{i:0;height:608;width:1218}D{i:7}
+    D{i:0;height:608;width:1218}
 }
 ##^##*/

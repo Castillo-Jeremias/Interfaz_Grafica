@@ -2,7 +2,7 @@ import QtQuick 2.0
 import QtQuick.Controls 2.15
 import "../controls"
 
-Item {
+Page{
     property color colorBgComando : "#c00"
     id: item1
     implicitHeight: 1218

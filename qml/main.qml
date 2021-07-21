@@ -2,8 +2,9 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.15
-
+import QtQuick.Layouts 1.3
 import "controls"
+import "pages"
 
 Window {
     id: mainwindow
@@ -21,6 +22,11 @@ Window {
     // Propiedades
     property int windowStatus: 0
     property int windowMargin: 10
+
+    property bool flags_settings: false
+    property bool flags_tracking: false
+    property bool flag_manual: false
+    property bool flag_home: false
 
     // Funciones internas
     QtObject{
@@ -82,9 +88,69 @@ Window {
             btnManual.isActiveMenu = false
             btnTracking.isActiveMenu = false
         }
+
+        function pushPage(btnClicked){
+            var item
+            //console.log(stackView.currentItem)
+            switch(btnClicked){
+                case btnHome:
+                    if(flag_home == false){
+                        flag_home = true
+                        stackView.push(Qt.resolvedUrl("pages/HomePage.qml"),{objectName:"HomePage"},{replace:true},{destroyOnPop:false})
+                    }else{
+                        item = stackView.find(function(item, index) { return item.objectName === "HomePage" })
+                        if(item !== null){
+                            stackView.pop(item);
+                        }
+                    }
+                break;
+
+                case btnManual:
+                    if(flag_manual == false){
+                        flag_manual = true
+                        stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"),{objectName:"Manual"},{replace:true},{destroyOnPop:false})
+                    }else{
+                        item = stackView.find(function(item, index) { return item.objectName === "Manual" })
+                        if(item !== null){
+                            while(stackView.currentItem.objectName !== "Manual" ){
+                                console.log(stackView.currentItem)
+                                stackView.pop();
+                            }
+                            console.log(item)
+                            stackView.pop(item);
+                        }
+                    }
+                break;
+
+                case btnTracking:
+                    if(flags_tracking == false){
+                        flags_tracking = true
+                        stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"),{objectName:"Tracking"},{replace:true},{destroyOnPop:false})
+                    }else{
+                        item = stackView.find(function(item, index) { return item.objectName === "Tracking" })
+                        if(item !== null){
+                            stackView.pop(item)
+                        }
+                    }
+                break;
+
+                case btnSettings:
+                    if(flags_settings == false){
+                        flags_settings = true
+                        //console.log("Creamos la página Setting")
+                        stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"),{objectName:"Setting"},{replace:true},{destroyOnPop:false})
+                    }else{
+                        item = stackView.find(function(item, index) { return item.objectName === "Setting" })
+                        if(item !== null){
+                            stackView.pop(item);
+                            //console.log("Retiramos settings")
+                        }
+                    }
+                break;
+            }
+        }
+
     }
-
-
 
     Rectangle {
         z:1     // Se generaba un bug que no podiamos ver la interfaz en editor
@@ -265,8 +331,6 @@ Window {
                     anchors.bottomMargin: 5
 
                 }
-
-
             }
 
             Rectangle {
@@ -307,15 +371,12 @@ Window {
                         easing.type:  Easing.InOutQuint
                     }
 
-
-
                     Column {
                         id: column
                         anchors.fill: parent
                         anchors.topMargin: 0
                         anchors.bottomMargin: 60
                         clip: true
-
 
                         LeftMenuButton {
                             id: btnMenu
@@ -339,11 +400,9 @@ Window {
                             iconHeigh: 30
                             layer.textureMirroring: ShaderEffectSource.MirrorVertically
                             onClicked: {
+                                internal.disableButtonsMenu()
                                 btnHome.isActiveMenu = true
-                                btnSettings.isActiveMenu = false
-                                btnManual.isActiveMenu = false
-                                btnTracking.isActiveMenu = false
-                                stackView.push(Qt.resolvedUrl("pages/HomePage.qml"))
+                                internal.pushPage(btnHome)
                             }
                         }
 
@@ -360,7 +419,8 @@ Window {
                             onClicked: {
                                 internal.disableButtonsMenu()
                                 btnManual.isActiveMenu = true
-                                stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"))
+                                //stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"))
+                                internal.pushPage(btnManual)
                             }
                         }
 
@@ -378,7 +438,8 @@ Window {
                             onClicked: {
                                 internal.disableButtonsMenu()
                                 btnTracking.isActiveMenu = true
-                                stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"))
+                                //stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"))
+                                internal.pushPage(btnTracking)
                             }
                         }
 
@@ -398,7 +459,8 @@ Window {
                         onClicked: {
                             internal.disableButtonsMenu()
                             btnSettings.isActiveMenu = true
-                            stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"))
+                            //stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"))
+                            internal.pushPage(btnSettings)
                         }
                     }
                 }
@@ -416,13 +478,31 @@ Window {
 
                     StackView {
                         id: stackView
-                        height: parent.fill
-                        width: parent.fill
                         anchors.fill: parent
-                        anchors.centerIn: parent
                         initialItem: Qt.resolvedUrl("pages/HomePage.qml")
-
                     }
+
+                    ToolBar {
+                        x: 0
+                        y: 0
+                        width: 167
+                        height: 54
+                        RowLayout {
+                            anchors.fill: parent
+                            ToolButton {
+                                text: qsTr("‹")
+                                onClicked: stackView.pop()
+                            }
+                            Label {
+                                text: stackView.depth
+                                elide: Label.ElideRight
+                                horizontalAlignment: Qt.AlignHCenter
+                                verticalAlignment: Qt.AlignVCenter
+                                Layout.fillWidth: true
+                            }
+                        }
+                    }
+
                 }
 
                 Rectangle {
@@ -583,8 +663,10 @@ Window {
 
 
 
+
+
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5}
+    D{i:0;formeditorZoom:0.33}
 }
 ##^##*/
