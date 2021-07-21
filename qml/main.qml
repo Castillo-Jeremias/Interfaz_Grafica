@@ -28,6 +28,10 @@ Window {
     property bool flag_manual: false
     property bool flag_home: false
 
+    property bool flag_clear_first_page: true
+
+    property variant myPages: [viewHome.createObject(),viewManual.createObject(),viewTracking.createObject(),viewSetting.createObject()]
+
     // Funciones internas
     QtObject{
         id:internal
@@ -91,66 +95,97 @@ Window {
 
         function pushPage(btnClicked){
             var item
-            //console.log(stackView.currentItem)
+            //console.log(stackViewPrincipal.currentItem)
             switch(btnClicked){
-                case btnHome:
-                    if(flag_home == false){
-                        flag_home = true
-                        stackView.push(Qt.resolvedUrl("pages/HomePage.qml"),{objectName:"HomePage"},{replace:true},{destroyOnPop:false})
-                    }else{
-                        item = stackView.find(function(item, index) { return item.objectName === "HomePage" })
-                        if(item !== null){
-                            stackView.pop(item);
-                        }
-                    }
+
+            case btnHome:
+                // Creación de una única instancia de página Home
+                if(flag_home == false){
+                    flag_home = true
+                    clear_First_Page()
+                    stackViewPrincipal.push(myPages[0],{objectName:"HomePage"})
+                }else{
+                    searchAndActuPage("HomePage")
+                }
                 break;
 
-                case btnManual:
-                    if(flag_manual == false){
-                        flag_manual = true
-                        stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"),{objectName:"Manual"},{replace:true},{destroyOnPop:false})
-                    }else{
-                        item = stackView.find(function(item, index) { return item.objectName === "Manual" })
-                        if(item !== null){
-                            while(stackView.currentItem.objectName !== "Manual" ){
-                                console.log(stackView.currentItem)
-                                stackView.pop();
-                            }
-                            console.log(item)
-                            stackView.pop(item);
-                        }
-                    }
+            case btnManual:
+                // Creación de una única instancia de página Manual
+                if(flag_manual == false){
+                    flag_manual = true
+                    clear_First_Page()
+                    stackViewPrincipal.push(myPages[1],{objectName:"Manual"})
+                }else{
+                    searchAndActuPage("Manual")
+                }
                 break;
 
-                case btnTracking:
-                    if(flags_tracking == false){
-                        flags_tracking = true
-                        stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"),{objectName:"Tracking"},{replace:true},{destroyOnPop:false})
-                    }else{
-                        item = stackView.find(function(item, index) { return item.objectName === "Tracking" })
-                        if(item !== null){
-                            stackView.pop(item)
-                        }
-                    }
+            case btnTracking:
+                // Creación de una única instancia de página Tracking
+                if(flags_tracking == false){
+                    flags_tracking = true
+                    clear_First_Page()
+                    stackViewPrincipal.push(myPages[2],{objectName:"Tracking"})
+                }else{
+                    searchAndActuPage("Tracking")
+                }
                 break;
 
-                case btnSettings:
-                    if(flags_settings == false){
-                        flags_settings = true
-                        //console.log("Creamos la página Setting")
-                        stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"),{objectName:"Setting"},{replace:true},{destroyOnPop:false})
-                    }else{
-                        item = stackView.find(function(item, index) { return item.objectName === "Setting" })
-                        if(item !== null){
-                            stackView.pop(item);
-                            //console.log("Retiramos settings")
-                        }
-                    }
+            case btnSettings:
+                // Creación de una única instancia de página Setting
+                if(flags_settings == false){
+                    flags_settings = true
+                    clear_First_Page()
+                    //console.log("Creamos la página Setting")
+                    stackViewPrincipal.push(myPages[3],{objectName:"Setting"})
+                }else{
+                    searchAndActuPage("Setting")
+                }
                 break;
             }
         }
 
+        function clear_First_Page(){
+            if(flag_clear_first_page){
+                flag_clear_first_page = false
+                stackViewPrincipal.pop()
+            }
+        }
+
+        /* Busca en ambos stackview (o pilas) si existe un elemento que este almacenado
+           con una coincidencia en objectName en su campo
+        */
+        function searchAndActuPage(namedata){
+
+            var itemprincipal
+            var itemsecundario
+
+            // Si itemsecundario === null no existe elemento alamacenado con ese nombre
+            itemsecundario = stackViewSecundario.find(function(item, index) { return item.objectName === namedata })
+            itemprincipal = stackViewPrincipal.find(function(item, index) { return item.objectName === namedata })
+
+            if(itemsecundario !== null ){
+                while(itemsecundario.objectName !== stackViewPrincipal.currentItem.objectName){
+                    stackViewPrincipal.push(stackViewSecundario.currentItem)
+                    stackViewSecundario.pop()
+                    console.log("Almacene en primario el dato:"+ stackViewPrincipal.currentItem)
+                    console.log("Pase 2")
+                }
+            }
+
+            if(itemprincipal !== null){
+
+                while(itemprincipal.objectName !== stackViewPrincipal.currentItem.objectName){
+                    stackViewSecundario.push(stackViewPrincipal.currentItem)
+                    stackViewPrincipal.pop();
+                    console.log("Almacene en secundario el dato:"+ stackViewSecundario.currentItem)
+                    console.log("Pase 1")
+                }
+            }
+        }
     }
+
+
 
     Rectangle {
         z:1     // Se generaba un bug que no podiamos ver la interfaz en editor
@@ -477,11 +512,60 @@ Window {
                     anchors.leftMargin: 0
 
                     StackView {
-                        id: stackView
+                        id: stackViewPrincipal
                         anchors.fill: parent
                         initialItem: Qt.resolvedUrl("pages/HomePage.qml")
                     }
+                    StackView {
+                        id: stackViewSecundario
+                        anchors.fill: parent
+                        visible: false
+                    }
+                    Component{
+                        id:viewHome
+                        HomePage{}
+                    }
+                    Component{
+                        id:viewSetting
+                        SettingPage{}
+                    }
+                    Component{
+                        id:viewTracking
+                        TrackingPage{}
+                    }
+                    Component{
+                        id:viewManual
+                        ManualPage{}
+                    }
+                    /*
+                    Loader{
+                        id:viewHomePage
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("pages/HomePage.qml")
+                        visible: true
+                    }
 
+                    Loader{
+                        id:viewSettingPage
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("pages/SettingPage.qml")
+                        visible: false
+                    }
+
+                    Loader{
+                        id:viewManualPage
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("pages/ManualPage.qml")
+                        visible: false
+                    }
+
+                    Loader{
+                        id:viewTrackingPage
+                        anchors.fill: parent
+                        source: Qt.resolvedUrl("pages/TrackingPage.qml")
+                        visible: false
+                    }
+                    */
                     ToolBar {
                         x: 0
                         y: 0
@@ -491,10 +575,10 @@ Window {
                             anchors.fill: parent
                             ToolButton {
                                 text: qsTr("‹")
-                                onClicked: stackView.pop()
+                                onClicked: stackViewPrincipal.pop()
                             }
                             Label {
-                                text: stackView.depth
+                                text: stackViewPrincipal.depth
                                 elide: Label.ElideRight
                                 horizontalAlignment: Qt.AlignHCenter
                                 verticalAlignment: Qt.AlignVCenter
@@ -502,7 +586,6 @@ Window {
                             }
                         }
                     }
-
                 }
 
                 Rectangle {
@@ -667,6 +750,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.33}
+    D{i:0;formeditorZoom:0.25}
 }
 ##^##*/
