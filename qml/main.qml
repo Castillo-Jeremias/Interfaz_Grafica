@@ -102,10 +102,10 @@ Window {
                 // Creación de una única instancia de página Home
                 if(flag_home == false){
                     flag_home = true
-                    clear_First_Page()
                     stackViewPrincipal.push(myPages[0],{objectName:"HomePage"})
                 }else{
                     searchAndActuPage("HomePage")
+                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
                 }
                 break;
 
@@ -113,10 +113,10 @@ Window {
                 // Creación de una única instancia de página Manual
                 if(flag_manual == false){
                     flag_manual = true
-                    clear_First_Page()
                     stackViewPrincipal.push(myPages[1],{objectName:"Manual"})
                 }else{
                     searchAndActuPage("Manual")
+                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
                 }
                 break;
 
@@ -124,10 +124,10 @@ Window {
                 // Creación de una única instancia de página Tracking
                 if(flags_tracking == false){
                     flags_tracking = true
-                    clear_First_Page()
                     stackViewPrincipal.push(myPages[2],{objectName:"Tracking"})
                 }else{
                     searchAndActuPage("Tracking")
+                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
                 }
                 break;
 
@@ -135,20 +135,13 @@ Window {
                 // Creación de una única instancia de página Setting
                 if(flags_settings == false){
                     flags_settings = true
-                    clear_First_Page()
                     //console.log("Creamos la página Setting")
                     stackViewPrincipal.push(myPages[3],{objectName:"Setting"})
                 }else{
                     searchAndActuPage("Setting")
+                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
                 }
                 break;
-            }
-        }
-
-        function clear_First_Page(){
-            if(flag_clear_first_page){
-                flag_clear_first_page = false
-                stackViewPrincipal.pop()
             }
         }
 
@@ -156,30 +149,35 @@ Window {
            con una coincidencia en objectName en su campo
         */
         function searchAndActuPage(namedata){
-
-            var itemprincipal
-            var itemsecundario
+            var itemprincipal,itemsecundario
+            var itemToCopy
 
             // Si itemsecundario === null no existe elemento alamacenado con ese nombre
-            itemsecundario = stackViewSecundario.find(function(item, index) { return item.objectName === namedata })
+            itemsecundario = stackViewSecundario.find(function(item, index) { return item.objectName === namedata})
             itemprincipal = stackViewPrincipal.find(function(item, index) { return item.objectName === namedata })
 
-            if(itemsecundario !== null ){
-                while(itemsecundario.objectName !== stackViewPrincipal.currentItem.objectName){
-                    stackViewPrincipal.push(stackViewSecundario.currentItem)
+            if(itemsecundario !== null){
+                while(itemsecundario.objectName !== stackViewSecundario.currentItem.objectName){
+                    itemToCopy = stackViewSecundario.currentItem
+                    stackViewPrincipal.push(itemToCopy)
+                    stackViewSecundario.pop()
+                    console.log("Almacene en primario el dato:"+ stackViewPrincipal)
+                }
+                if(itemsecundario.objectName === stackViewSecundario.currentItem.objectName){
+                    itemToCopy = stackViewSecundario.currentItem
+                    stackViewPrincipal.push(itemToCopy)
                     stackViewSecundario.pop()
                     console.log("Almacene en primario el dato:"+ stackViewPrincipal.currentItem)
-                    console.log("Pase 2")
                 }
+                return
             }
 
             if(itemprincipal !== null){
-
                 while(itemprincipal.objectName !== stackViewPrincipal.currentItem.objectName){
-                    stackViewSecundario.push(stackViewPrincipal.currentItem)
+                    itemToCopy = stackViewPrincipal.currentItem
+                    stackViewSecundario.push(itemToCopy)
                     stackViewPrincipal.pop();
                     console.log("Almacene en secundario el dato:"+ stackViewSecundario.currentItem)
-                    console.log("Pase 1")
                 }
             }
         }
@@ -514,7 +512,7 @@ Window {
                     StackView {
                         id: stackViewPrincipal
                         anchors.fill: parent
-                        initialItem: Qt.resolvedUrl("pages/HomePage.qml")
+                        //initialItem: Qt.resolvedUrl("pages/HomePage.qml")
                     }
                     StackView {
                         id: stackViewSecundario
@@ -750,6 +748,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.25}
+    D{i:0;formeditorZoom:0.5}
 }
 ##^##*/
