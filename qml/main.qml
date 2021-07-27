@@ -23,15 +23,6 @@ Window {
     property int windowStatus: 0
     property int windowMargin: 10
 
-    property bool flags_settings: false
-    property bool flags_tracking: false
-    property bool flag_manual: false
-    property bool flag_home: false
-
-    property bool flag_clear_first_page: true
-
-    property variant myPages: [viewHome.createObject(),viewManual.createObject(),viewTracking.createObject(),viewSetting.createObject()]
-
     // Funciones internas
     QtObject{
         id:internal
@@ -93,54 +84,35 @@ Window {
             btnTracking.isActiveMenu = false
         }
 
-        function pushPage(btnClicked){
-            var item
-            //console.log(stackViewPrincipal.currentItem)
+        function disableViews(){
+            viewHomePage.visible = false
+            viewSettingPage.visible = false
+            viewTrackingPage.visible = false
+            viewManualPage.visible = false
+        }
+
+        function setVisibility(btnClicked){
+
             switch(btnClicked){
 
             case btnHome:
-                // Creación de una única instancia de página Home
-                if(flag_home == false){
-                    flag_home = true
-                    stackViewPrincipal.push(myPages[0],{objectName:"HomePage"})
-                }else{
-                    searchAndActuPage("HomePage")
-                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
-                }
+                disableViews()
+                viewHomePage.visible = true
                 break;
 
             case btnManual:
-                // Creación de una única instancia de página Manual
-                if(flag_manual == false){
-                    flag_manual = true
-                    stackViewPrincipal.push(myPages[1],{objectName:"Manual"})
-                }else{
-                    searchAndActuPage("Manual")
-                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
-                }
+                disableViews()
+                viewManualPage.visible = true
                 break;
 
             case btnTracking:
-                // Creación de una única instancia de página Tracking
-                if(flags_tracking == false){
-                    flags_tracking = true
-                    stackViewPrincipal.push(myPages[2],{objectName:"Tracking"})
-                }else{
-                    searchAndActuPage("Tracking")
-                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
-                }
+                disableViews()
+                viewTrackingPage.visible = true
                 break;
 
             case btnSettings:
-                // Creación de una única instancia de página Setting
-                if(flags_settings == false){
-                    flags_settings = true
-                    //console.log("Creamos la página Setting")
-                    stackViewPrincipal.push(myPages[3],{objectName:"Setting"})
-                }else{
-                    searchAndActuPage("Setting")
-                    console.info("Seteado ->:"+stackViewPrincipal.currentItem)
-                }
+                disableViews()
+                viewSettingPage.visible = true
                 break;
             }
         }
@@ -435,7 +407,7 @@ Window {
                             onClicked: {
                                 internal.disableButtonsMenu()
                                 btnHome.isActiveMenu = true
-                                internal.pushPage(btnHome)
+                                internal.setVisibility(btnHome)
                             }
                         }
 
@@ -453,7 +425,7 @@ Window {
                                 internal.disableButtonsMenu()
                                 btnManual.isActiveMenu = true
                                 //stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"))
-                                internal.pushPage(btnManual)
+                                internal.setVisibility(btnManual)
                             }
                         }
 
@@ -472,7 +444,7 @@ Window {
                                 internal.disableButtonsMenu()
                                 btnTracking.isActiveMenu = true
                                 //stackView.push(Qt.resolvedUrl("pages/TrackingPage.qml"))
-                                internal.pushPage(btnTracking)
+                                internal.setVisibility(btnTracking)
                             }
                         }
 
@@ -493,7 +465,7 @@ Window {
                             internal.disableButtonsMenu()
                             btnSettings.isActiveMenu = true
                             //stackView.push(Qt.resolvedUrl("pages/SettingPage.qml"))
-                            internal.pushPage(btnSettings)
+                            internal.setVisibility(btnSettings)
                         }
                     }
                 }
@@ -509,33 +481,6 @@ Window {
                     anchors.bottomMargin: 20
                     anchors.leftMargin: 0
 
-                    StackView {
-                        id: stackViewPrincipal
-                        anchors.fill: parent
-                        //initialItem: Qt.resolvedUrl("pages/HomePage.qml")
-                    }
-                    StackView {
-                        id: stackViewSecundario
-                        anchors.fill: parent
-                        visible: false
-                    }
-                    Component{
-                        id:viewHome
-                        HomePage{}
-                    }
-                    Component{
-                        id:viewSetting
-                        SettingPage{}
-                    }
-                    Component{
-                        id:viewTracking
-                        TrackingPage{}
-                    }
-                    Component{
-                        id:viewManual
-                        ManualPage{}
-                    }
-                    /*
                     Loader{
                         id:viewHomePage
                         anchors.fill: parent
@@ -562,27 +507,6 @@ Window {
                         anchors.fill: parent
                         source: Qt.resolvedUrl("pages/TrackingPage.qml")
                         visible: false
-                    }
-                    */
-                    ToolBar {
-                        x: 0
-                        y: 0
-                        width: 167
-                        height: 54
-                        RowLayout {
-                            anchors.fill: parent
-                            ToolButton {
-                                text: qsTr("‹")
-                                onClicked: stackViewPrincipal.pop()
-                            }
-                            Label {
-                                text: stackViewPrincipal.depth
-                                elide: Label.ElideRight
-                                horizontalAlignment: Qt.AlignHCenter
-                                verticalAlignment: Qt.AlignVCenter
-                                Layout.fillWidth: true
-                            }
-                        }
                     }
                 }
 
@@ -748,6 +672,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5}
+    D{i:0;formeditorZoom:0.25}
 }
 ##^##*/
