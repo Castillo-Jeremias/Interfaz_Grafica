@@ -27,6 +27,7 @@ Window {
 
     QtObject{
         id:internal
+
         function resetResize(){
             // Visibilidad de los ajustes de ventana
             resizeLeft.visible = true
