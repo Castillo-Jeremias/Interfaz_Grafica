@@ -24,6 +24,7 @@ Window {
     property int windowMargin: 10
 
     // Funciones internas
+
     QtObject{
         id:internal
         function resetResize(){
