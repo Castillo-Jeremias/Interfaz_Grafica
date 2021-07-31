@@ -529,7 +529,7 @@ Window {
                         width: 400
                         height: 30
                         color: "#ffffff"
-                        text: qsTr("Desarrollado por: Sebastían C. Biagiola; Campero, Gustavo; Castillo Jeremías")
+                        text: qsTr("Desarrollado por: Biagiola, Sebastían C. ; Campero, Gustavo; Castillo, Jeremías")
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.right: parent.right
                         horizontalAlignment: Text.AlignHCenter
@@ -672,6 +672,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.25}
+    D{i:0;formeditorZoom:0.33}
 }
 ##^##*/

@@ -4,7 +4,7 @@ import QtGraphicalEffects 1.15
 
 Button{
 
-    width: 100
+    width: 300
     height: 50
     visible: true
 
@@ -30,11 +30,14 @@ Button{
 
         }
     }
-}
+    CustomComboBox{
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 2
+        anchors.topMargin: 2
+        anchors.rightMargin: 2
 
+    }
 
-/*##^##
-Designer {
-    D{i:0;formeditorZoom:1.25}
 }
-##^##*/

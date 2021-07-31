@@ -30,18 +30,62 @@ Page{
 
         Rectangle {
             id: backGroundComandos
+            x: 72
+            y: 359
+            width: 347
+            height: 164
             color: colorBgComando
             radius: 15
-            border.width: 5
-            anchors.left: parent.left
-            anchors.right: backgroundLog.left
-            anchors.top: parent.top
-            anchors.bottom: parent.bottom
-            anchors.rightMargin: 191
-            anchors.leftMargin: 50
-            anchors.bottomMargin: 30
-            anchors.topMargin: 311
-            rotation: 0
+            border.width: 3
+
+            Grid {
+                id: gridComandos
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 15
+                anchors.leftMargin: 15
+                anchors.topMargin: 15
+                anchors.bottomMargin: 15
+                flow: Grid.LeftToRight
+                spacing: 10
+                rows: 2
+                columns: 3
+                Rectangle{
+                    width: 100
+                    height: 30
+                    color: "#00000000"
+                }
+
+                CustomButton{
+                    id:btnArriba
+                    width: 100
+                    iconSource: "../../images/svg_images/Arriba.png"
+                }
+
+                Rectangle{
+                    width: 100
+                    height: 30
+                    color: "#00000000"
+                }
+                CustomButton{
+                    id:btnIzquierda
+                    width: 100
+                    iconSource: "../../images/svg_images/Izquierda.png"
+                }
+                CustomButton{
+                    id:btnAbajo
+                    width: 100
+                    iconSource: "../../images/svg_images/Abajo.png"
+                }
+                CustomButton{
+                    id:btnDerecha
+                    width: 100
+                    iconSource: "../../images/svg_images/Derecha.png"
+                }
+
+            }
 
         }
 
@@ -80,6 +124,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5;height:608;width:1218}D{i:3}D{i:4}D{i:5}
+    D{i:0;formeditorZoom:0.75;height:608;width:1218}D{i:4}
 }
 ##^##*/

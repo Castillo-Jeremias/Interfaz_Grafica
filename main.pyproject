@@ -1,3 +1,3 @@
 {
-    "files": ["main.py","qml/controls/TopBarButton.qml","qml/controls/CustomComboBox.qml","qml/controls/LeftMenuButton.qml","qml/controls/LogoFceia.qml","qml/pages/HomePage.qml","qml/pages/TrackingPage.qml","qml/controls/CustomButton.qml","qml/pages/SettingPage.qml","qml/pages/ManualPage.qml","main.qml","qml/controls/CustomLabel.qml"]
+    "files": ["qml/controls/CustomLabel.qml","qml/pages/SettingPage.qml","qml/controls/CustomButton.qml","qml/pages/ManualPage.qml","qml/controls/ComboBox_Label.qml","qml/pages/TrackingPage.qml","main.qml","main.py","qml/controls/TopBarButton.qml","qml/controls/LeftMenuButton.qml","qml/controls/Label_TextEdit.qml","qml/controls/LogoFceia.qml","qml/controls/CustomComboBox.qml","qml/pages/HomePage.qml","qml/controls/CustomBusyIndicator.qml"]
 }

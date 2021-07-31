@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.15
 
+
 TextField {
     id: textField
 
@@ -24,6 +25,7 @@ TextField {
     implicitHeight: 40
     placeholderText: qsTr("Type something")
     color: "#ffffff"
+    text: ""
     background: Rectangle {
         color: internal.dynamicColor
         radius: 10
@@ -37,6 +39,6 @@ TextField {
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;height:40;width:640}
+    D{i:0;autoSize:true;height:40;width:200}
 }
 ##^##*/

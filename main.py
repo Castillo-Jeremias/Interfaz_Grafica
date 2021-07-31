@@ -5,7 +5,7 @@ import sys
 
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine
-
+from PySide2.QtCore import QObject, Signal,Slot
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)

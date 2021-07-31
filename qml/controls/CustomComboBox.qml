@@ -25,7 +25,6 @@ ComboBox{
     background: Rectangle{
         id:backgroundComboBox
         color: internal.dynamicColor
-        border.width: 2
         radius: 15
     }
     contentItem: Item{
@@ -64,6 +63,6 @@ ComboBox{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.75;height:50;width:150}D{i:4}
+    D{i:0;formeditorZoom:1.66;height:50;width:150}
 }
 ##^##*/
