@@ -8,6 +8,8 @@ Button{
     property color backgroundButton: "#1c1d20"
     property string dataTxt: "Data Text"
     property int altotxt: 8
+    property int shadowVertical: 5
+    property int shadowHorizontal: 5
     property bool enableEditData: false
 
     id:id_label_TextEdit
@@ -22,11 +24,22 @@ Button{
         width: parent.width
         height: parent.height
         color: backgroundButton
-        border.width: 2
+        border.width: 1
         radius: 10
     }
 
+    DropShadow{
+        anchors.fill: backgroundlabel_TextEdit
+        horizontalOffset: shadowHorizontal
+        verticalOffset:shadowVertical
+        radius: backgroundlabel_TextEdit.radius
+        samples: 20
+        color:"#80000000"
+        source: backgroundlabel_TextEdit
+    }
+
     contentItem: Item{
+        z:1
         id: item1
         width: 300
         anchors.fill: parent
@@ -72,8 +85,9 @@ Button{
 
 
 
+
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.25}
+    D{i:0;formeditorZoom:1.1}
 }
 ##^##*/

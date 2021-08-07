@@ -9,27 +9,44 @@ Button{
     property color btnDefault: "#1c1d20"
     property color btnMouseOver: "#23272E"
     property color btnColorClicked: "#00a1f1"
-    text: ""
+    property color colorBtnDisable:"#636671"
+    property int shadowHorizontal: 5
+    property int shadowVertical: 5
 
     implicitWidth: 200
     implicitHeight: 60
+
+    DropShadow{
+        anchors.fill: backgroundBtn
+        horizontalOffset: shadowHorizontal
+        verticalOffset:shadowVertical
+        radius: backgroundBtn.radius
+        samples: 20
+        color:"#80000000"
+        source: backgroundBtn
+    }
 
     QtObject{
         id:internal
 
         property var dynamicColor:
-            if(btnToggle.down){
-                btnToggle.down ? btnColorClicked : btnDefault
+            if(btnToggle.enabled){
+                if(btnToggle.down){
+                    btnToggle.down ? btnColorClicked : btnDefault
+                }else{
+                    btnToggle.hovered ? btnMouseOver: btnDefault
+                }
              }else{
-                btnToggle.hovered ? btnMouseOver: btnDefault
+                colorBtnDisable
              }
     }
-
 
     background: Rectangle{
             id:backgroundBtn
             color:internal.dynamicColor
             radius: 10
+            border.width: 2
+
             Image {
                 id: iconBtn
                 source: iconSource
@@ -54,6 +71,6 @@ Button{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:1.33;height:60;width:60}
+    D{i:0;autoSize:true;formeditorZoom:0.9;height:60;width:60}
 }
 ##^##*/

@@ -116,6 +116,8 @@ Page{
             anchors.leftMargin: 620
             anchors.topMargin: 324
         }
+
+        ButtonTracking{}
     }
 
 
@@ -124,6 +126,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.75;height:608;width:1218}D{i:4}
+    D{i:0;formeditorZoom:0.9;height:608;width:1218}
 }
 ##^##*/

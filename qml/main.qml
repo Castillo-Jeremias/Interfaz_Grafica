@@ -3,6 +3,7 @@ import QtQuick.Window 2.15
 import QtQuick.Controls 2.15
 import QtGraphicalEffects 1.15
 import QtQuick.Layouts 1.3
+
 import "controls"
 import "pages"
 
@@ -14,9 +15,16 @@ Window {
 
     height: 700
     width: 1300
+
+    //Mínima resolución de escritorio tolerada
     minimumHeight: 700
     minimumWidth:  1300
-    // Removemos bordes de de aplicación deWindows
+
+    //Máxima resolución de escritorio tolerada
+    maximumHeight: 1920
+    maximumWidth:  1080
+
+    // Removemos bordes de de aplicación de Windows
     flags: Qt.Window | Qt.FramelessWindowHint
 
     // Propiedades
@@ -118,43 +126,6 @@ Window {
                 break;
             }
         }
-
-        /* Busca en ambos stackview (o pilas) si existe un elemento que este almacenado
-           con una coincidencia en objectName en su campo
-        */
-        function searchAndActuPage(namedata){
-            var itemprincipal,itemsecundario
-            var itemToCopy
-
-            // Si itemsecundario === null no existe elemento alamacenado con ese nombre
-            itemsecundario = stackViewSecundario.find(function(item, index) { return item.objectName === namedata})
-            itemprincipal = stackViewPrincipal.find(function(item, index) { return item.objectName === namedata })
-
-            if(itemsecundario !== null){
-                while(itemsecundario.objectName !== stackViewSecundario.currentItem.objectName){
-                    itemToCopy = stackViewSecundario.currentItem
-                    stackViewPrincipal.push(itemToCopy)
-                    stackViewSecundario.pop()
-                    console.log("Almacene en primario el dato:"+ stackViewPrincipal)
-                }
-                if(itemsecundario.objectName === stackViewSecundario.currentItem.objectName){
-                    itemToCopy = stackViewSecundario.currentItem
-                    stackViewPrincipal.push(itemToCopy)
-                    stackViewSecundario.pop()
-                    console.log("Almacene en primario el dato:"+ stackViewPrincipal.currentItem)
-                }
-                return
-            }
-
-            if(itemprincipal !== null){
-                while(itemprincipal.objectName !== stackViewPrincipal.currentItem.objectName){
-                    itemToCopy = stackViewPrincipal.currentItem
-                    stackViewSecundario.push(itemToCopy)
-                    stackViewPrincipal.pop();
-                    console.log("Almacene en secundario el dato:"+ stackViewSecundario.currentItem)
-                }
-            }
-        }
     }
 
 
@@ -170,6 +141,7 @@ Window {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        clip: true
 
         anchors.topMargin: windowMargin
         anchors.bottomMargin: windowMargin
@@ -255,6 +227,7 @@ Window {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: bottomBar.top
+                    clip: true
                     anchors.bottomMargin: 0
                     anchors.leftMargin: 0
                     anchors.rightMargin: 0
@@ -267,6 +240,7 @@ Window {
                         anchors.right: closeButton.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
+                        clip: true
                         anchors.topMargin: 5
                         anchors.bottomMargin: 5
                         anchors.leftMargin: 40
@@ -284,6 +258,7 @@ Window {
                         anchors.right: parent.right
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
+                        clip: true
                         anchors.leftMargin: 75
                         btnColorClicked: "#ff007f"
                         btnMouseOver: "#797979"
@@ -293,7 +268,9 @@ Window {
                         btnDefault: "#3f3f3f"
                         iconSource: "../images/svg_images/close_icon.svg"
 
-                        onClicked: mainwindow.close()
+                        onClicked: {
+                            mainwindow.close()
+                        }
                     }
 
                     TopBarButton {
@@ -302,6 +279,7 @@ Window {
                         anchors.right: maximizeButton.left
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
+                        clip: true
                         anchors.rightMargin: 10
                         anchors.leftMargin: 5
                         btnMouseOver: "#555555"
@@ -361,6 +339,7 @@ Window {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
+                    clip: true
                     anchors.leftMargin: 0
                     anchors.bottomMargin: 0
                     anchors.topMargin: 0
@@ -460,6 +439,7 @@ Window {
                         text: qsTr("Setting")
                         anchors.left: parent.left
                         anchors.bottom: parent.bottom
+                        clip: false
                         anchors.leftMargin: 0
                         anchors.bottomMargin: 20
                         iconSource: "../images/svg_images/settings_icon.svg"
@@ -519,6 +499,7 @@ Window {
                     anchors.right: parent.right
                     anchors.top: contentPage.bottom
                     anchors.bottom: parent.bottom
+                    clip: true
                     anchors.rightMargin: 0
                     anchors.leftMargin: 0
                     anchors.bottomMargin: 0
@@ -536,6 +517,7 @@ Window {
                         anchors.right: parent.right
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
+                        clip: false
                         anchors.rightMargin: 20
                     }
                 }
@@ -674,6 +656,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.33}
+    D{i:0;formeditorZoom:0.25}
 }
 ##^##*/
