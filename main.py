@@ -38,12 +38,21 @@ class VentanaPrincipal(QObject):
         #Carga de nueva cuenta
         self.timerautosave.start(Tiempo_AutoSave)
 
-    #Creación de la señal que se encarga de actualizar datos en la interface cada 1 segundo, no envia datos. (podría hacerlo)
-    actualizar = Signal()
 
     #No es necesario un slot por que no recibimos datos desde UI, ni tampoco una signal dado que no mandamos nada
+    # La lógica de esta combinación es necesaria ya que si no puede generarse discrepancia de los datos guardados.
+
+    # Orden de ejecución:
+    #   - Timer desborda -> Ejecuta autoGuardadoLog()
+    #   - autoGuardadoLog -> Envia signal a la UI
+    #   - UI responde y ejecuta saveDataLog() Y si hay datos distintos en el LOG
+    #   de los que ya se tenian en un princpio en DataToSave se guardan
+
+    #Creación de la señal que se encarga de actualizar datos en la interface cada 1 segundo, no envia datos. (podría hacerlo)
+    actualizarDataToSave = Signal()
+
     def autoGuardadoLog(self):
-        self.actualizar.emit()
+        self.actualizarDataToSave.emit()
         if(self.DataSaved != self.DataToSave):
             file = open(QUrl(DEFAULT_URL_LOG).toLocalFile(), "a")
             file.write(self.DataToSave + "\n")
@@ -52,16 +61,24 @@ class VentanaPrincipal(QObject):
             print("saved")
 
     @Slot(str)
-    def sendDataToSave(self,dataLog):
+    def saveDataLog(self,dataLog):
         if(self.DataToSave != dataLog):
             self.DataToSave = dataLog
 
+    #Guardado de LOG en una dirección determinada por el usuario a gusto.
     @Slot(str)
     def saveFile(self,filePath):
         file = open(QUrl(filePath).toLocalFile(), "a")
         file.write(self.DataToSave)
         file.close()
 
+    #############################################################################################################
+    # Hay diferencia entre el autoGuardadoLog() y cleanLog() ya que aca la ejecución de esta última esta función
+    # es por la UI y en el caso anterior se necesita saber desde la UI cuando desborda el Timer,
+    # por ello se utiliza la signal en la primera.
+    #############################################################################################################
+
+    #Señal enviada a la UI para notificar que los datos fueron guardados y puede borrar lo que tenga el LOG
     cleanLogAvalible = Signal()
 
     @Slot(str)
@@ -73,6 +90,11 @@ class VentanaPrincipal(QObject):
             print("Limpiando ventana de LOG")
 
         self.cleanLogAvalible.emit()
+
+    @Slot()
+    def sendArribaToMicro(self):
+        #comm serial a puerto X
+        print("gg")
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)

@@ -339,6 +339,7 @@ Page{
                     id:btnArriba
                     width: (gridComandos.width-2*gridComandos.spacing)/3
                     height: (gridComandos.height-gridComandos.spacing)/2
+                    autoExclusive: true
                     colorBtnDisable: "#636671"
                     btnDefault: "#1c1d20"
                     iconSource: "../../images/svg_images/Arriba.png"
@@ -346,6 +347,8 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
+
+                        backendPython.sendArribaToMicro()
                     }
                 }
 
@@ -704,7 +707,7 @@ Page{
                     onAccepted:{
                         // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
                         // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
-                        backendPython.sendDataToSave(ventanaLog.getFormattedText(0,ventanaLog.length))
+                        backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
                         backendPython.saveFile(fileSave.fileUrl)
                     }
                 }
@@ -797,13 +800,9 @@ Page{
     Connections{
         target: backendPython
 
-        function onActualizar(){
-            backendPython.sendDataToSave(ventanaLog.getFormattedText(0,ventanaLog.length))
-            // Actualización de Log y datos relevantes cada 1 seg
-        }
-
-        function onCleanLogAvalible(){
-            ventanaLog.clear()
+        function onActualizarDataToSave(){
+            backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
+            //Guardado de la información de LOG cada "X" de tiempo. Este "X" se define en el backend de Python
         }
 
     }
@@ -811,6 +810,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.5;height:608;width:1218}D{i:50}
+    D{i:0;formeditorZoom:0.5;height:608;width:1218}
 }
 ##^##*/
