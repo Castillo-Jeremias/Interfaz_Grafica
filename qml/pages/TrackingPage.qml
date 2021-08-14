@@ -69,6 +69,39 @@ Page{
               return "Calibrar Home"
             }
         }
+
+        function sendCommandToBackend(btnClicked){
+            switch(btnClicked){
+                case btnArriba:
+                   backendPython.moveUp()
+                break
+
+                case btnAbajo:
+                   backendPython.moveDown()
+                break
+
+                case btnIzquierda:
+                   backendPython.moveToLeft()
+                break
+
+                case btnDerecha:
+                   backendPython.moveToRight()
+                break
+
+                case btnStop:
+                   backendPython.stopEverthing()
+                break
+
+                case btnStopAcimut:
+                    backendPython.stopAcimut()
+                break
+
+                case btnStopElevacion:
+                    backendPython.stopElevacion()
+                break
+            }
+        }
+
 }
 
     Rectangle {
@@ -348,7 +381,7 @@ Page{
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
 
-                        backendPython.sendArribaToMicro()
+                        internal.sendCommandToBackend(btnArriba)
                     }
                 }
 
@@ -366,6 +399,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia la izquierda")
+                        internal.sendCommandToBackend(btnIzquierda)
                     }
                 }
                 CustomButton{
@@ -377,6 +411,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia abajo")
+                        internal.sendCommandToBackend(btnAbajo)
                     }
                 }
                 CustomButton{
@@ -388,6 +423,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia la derecha")
+                        internal.sendCommandToBackend(btnDerecha)
                     }
                 }
             }
@@ -417,6 +453,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Detener Acimut")
+                        internal.sendCommandToBackend(btnStopAcimut)
                     }
                 }
 
@@ -434,6 +471,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Detener Elevación")
+                        internal.sendCommandToBackend(btnStopElevacion)
                     }
                 }
 
@@ -451,6 +489,7 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Detener Ambos Motores")
+                        internal.sendCommandToBackend(btnStop)
                     }
                 }
             }
@@ -804,6 +843,7 @@ Page{
             backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
             //Guardado de la información de LOG cada "X" de tiempo. Este "X" se define en el backend de Python
         }
+
 
     }
 }

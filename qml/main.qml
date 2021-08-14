@@ -105,25 +105,25 @@ Window {
 
             switch(btnClicked){
 
-            case btnHome:
-                disableViews()
-                viewHomePage.visible = true
-                break;
+                case btnHome:
+                    disableViews()
+                    viewHomePage.visible = true
+                    break;
 
-            case btnManual:
-                disableViews()
-                viewManualPage.visible = true
-                break;
+                case btnManual:
+                    disableViews()
+                    viewManualPage.visible = true
+                    break;
 
-            case btnTracking:
-                disableViews()
-                viewTrackingPage.visible = true
-                break;
+                case btnTracking:
+                    disableViews()
+                    viewTrackingPage.visible = true
+                    break;
 
-            case btnSettings:
-                disableViews()
-                viewSettingPage.visible = true
-                break;
+                case btnSettings:
+                    disableViews()
+                    viewSettingPage.visible = true
+                    break;
             }
         }
     }
@@ -428,8 +428,6 @@ Window {
                                 internal.setVisibility(btnTracking)
                             }
                         }
-
-
                     }
 
                     LeftMenuButton {

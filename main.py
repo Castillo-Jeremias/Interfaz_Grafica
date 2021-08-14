@@ -92,9 +92,49 @@ class VentanaPrincipal(QObject):
         self.cleanLogAvalible.emit()
 
     @Slot()
-    def sendArribaToMicro(self):
+    def moveUp(self):
         #comm serial a puerto X
-        print("gg")
+        print("Arriba")
+
+    @Slot()
+    def moveDown(self):
+        #comm serial a puerto X
+        print("Abajo")
+
+    @Slot()
+    def moveToRight(self):
+        #comm serial a puerto X
+        print("Derecha")
+
+    @Slot()
+    def moveToLeft(self):
+        #comm serial a puerto X
+        print("Izquierda")
+
+    @Slot()
+    def moveToLeft(self):
+        #comm serial a puerto X
+        print("Izquierda")
+
+    @Slot()
+    def stopAcimut(self):
+        #comm serial a puerto X
+        print("Izquierda")
+
+    @Slot()
+    def stopAcimut(self):
+        #comm serial a puerto X
+        print("Parando acimut")
+
+    @Slot()
+    def stopElevacion(self):
+        #comm serial a puerto X
+        print("Parando Elevación")
+
+    @Slot()
+    def stopEverthing(self):
+        #comm serial a puerto X
+        print("Parando todo")
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
