@@ -91,51 +91,46 @@ class VentanaPrincipal(QObject):
 
         self.cleanLogAvalible.emit()
 
+    #############################################################################################################
+    #                                      Comando manuales                                                     #
+    #############################################################################################################
     @Slot()
     def moveUp(self):
-        #comm serial a puerto X
+        #comando a enviar: "U\r"
         print("Arriba")
 
     @Slot()
     def moveDown(self):
-        #comm serial a puerto X
+        #comando a enviar: "D\r"
         print("Abajo")
 
     @Slot()
     def moveToRight(self):
-        #comm serial a puerto X
+        #comando a enviar: "R\r"
         print("Derecha")
 
     @Slot()
     def moveToLeft(self):
-        #comm serial a puerto X
-        print("Izquierda")
-
-    @Slot()
-    def moveToLeft(self):
-        #comm serial a puerto X
+        #comando a enviar: "L\r"
         print("Izquierda")
 
     @Slot()
     def stopAcimut(self):
-        #comm serial a puerto X
-        print("Izquierda")
-
-    @Slot()
-    def stopAcimut(self):
-        #comm serial a puerto X
-        print("Parando acimut")
+        #comando a enviar: "A\r"
+        print("Parando Acimut")
 
     @Slot()
     def stopElevacion(self):
-        #comm serial a puerto X
+        #comando a enviar: "E\r"
         print("Parando Elevación")
 
     @Slot()
     def stopEverthing(self):
-        #comm serial a puerto X
+        #comando a enviar: "S\r"
         print("Parando todo")
-
+    #############################################################################################################
+    #                                         Fin comando manuales                                              #
+    #############################################################################################################
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()

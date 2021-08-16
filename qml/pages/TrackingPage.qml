@@ -380,8 +380,14 @@ Page{
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
-
+                    }
+                    onReleased: {
+                        internal.sendCommandToBackend(btnStopElevacion)
+                        console.log(internal.getTime() + " --- Parando acimut")
+                    }
+                    onPressed:{
                         internal.sendCommandToBackend(btnArriba)
+                        console.log(internal.getTime() + " --- Moviendo antena hacia arriba")
                     }
                 }
 
@@ -401,6 +407,14 @@ Page{
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia la izquierda")
                         internal.sendCommandToBackend(btnIzquierda)
                     }
+                    onReleased: {
+                        internal.sendCommandToBackend(btnStopAcimut)
+                        console.log(internal.getTime() + " --- Parando acimut")
+                    }
+                    onPressed:{
+                        internal.sendCommandToBackend(btnIzquierda)
+                        console.log(internal.getTime() + " --- Movimiento hacia la Izquierda")
+                    }
                 }
                 CustomButton{
                     id:btnAbajo
@@ -413,6 +427,14 @@ Page{
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia abajo")
                         internal.sendCommandToBackend(btnAbajo)
                     }
+                    onReleased: {
+                        internal.sendCommandToBackend(btnStopElevacion)
+                        console.log(internal.getTime() + " --- Parando acimut")
+                    }
+                    onPressed:{
+                        internal.sendCommandToBackend(btnAbajo)
+                        console.log(internal.getTime() + " --- Movimiento hacia abajo")
+                    }
                 }
                 CustomButton{
                     id:btnDerecha
@@ -424,6 +446,14 @@ Page{
                         internal.showNothingdataTxt()
                         ventanaLog.append( internal.getTime() + " --- Movimiento hacia la derecha")
                         internal.sendCommandToBackend(btnDerecha)
+                    }
+                    onReleased: {
+                        internal.sendCommandToBackend(btnStopAcimut)
+                        console.log(internal.getTime() + " --- Parando acimut")
+                    }
+                    onPressed:{
+                        internal.sendCommandToBackend(btnDerecha)
+                        console.log(internal.getTime() + " --- Movimiento hacia la derecha")
                     }
                 }
             }
