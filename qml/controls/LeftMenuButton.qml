@@ -10,16 +10,15 @@ Button{
 
     property url iconSource: "../../images/svg_images/home_icon.svg"
     property color btnDefault: "#222222"
-    property color btnMouseOver: "#23272E"
+    property color btnMouseOver: "#485161"
     property color btnColorClicked: "#00a1f1"
 
     property int iconWidth: 20
     property int iconHeigh: 20
 
-    property color activeMenuColorLeft: "#55aaff"
-    property color activeMenuColorRight: "#2c313c"
-    property color buttonPush: "#2a2a2a"
-    property int  ancho_altoRectPush: 5
+    property color btnActiveBorderColor: "#55aaff"
+    property int  anchoBorde: 2
+    property int radioBorde: 10
     property bool isActiveMenu: false
 
     QtObject{
@@ -32,64 +31,12 @@ Button{
             }
     }
 
-
     background: Rectangle{
             id: backgroundBtn
             color: internal.dynamicColor
-
-            Rectangle{
-                anchors{
-                    top: parent.top
-                    left: parent.left
-                    bottom: parent.bottom
-                }
-                color: activeMenuColorLeft
-                width: 3
-                visible: isActiveMenu
-            }
-
-            Rectangle{
-                anchors{
-                    top: parent.top
-                    right: parent.right
-                    bottom: parent.bottom
-                }
-                color: buttonPush
-                width: ancho_altoRectPush
-                visible: isActiveMenu
-            }
-
-            Rectangle{
-                height: ancho_altoRectPush
-                visible: isActiveMenu
-                color: buttonPush
-
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
-                }
-
-                anchors.rightMargin: 0
-                anchors.leftMargin: 3
-                anchors.bottomMargin: 0
-            }
-            Rectangle{
-                height: ancho_altoRectPush
-                visible: isActiveMenu
-                color: buttonPush
-
-                anchors{
-                    left: parent.left
-                    right: parent.right
-                    top: parent.top
-                }
-
-                anchors.topMargin: 0
-                anchors.rightMargin: 0
-                anchors.leftMargin: 3
-            }
-
+            radius: radioBorde
+            border.color: btnLeftMenu.isActiveMenu? btnActiveBorderColor : btnDefault
+            border.width: btnLeftMenu.isActiveMenu? anchoBorde : 0
     }
 
     contentItem: Item{

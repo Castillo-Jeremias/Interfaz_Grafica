@@ -92,13 +92,6 @@ Page{
                    backendPython.stopEverthing()
                 break
 
-                case btnStopAcimut:
-                    backendPython.stopAcimut()
-                break
-
-                case btnStopElevacion:
-                    backendPython.stopElevacion()
-                break
             }
         }
 
@@ -106,7 +99,7 @@ Page{
 
     Rectangle {
         id: backGroundPage
-        color: "#2c313b"
+        color: "#303641"
         anchors.fill: parent
         anchors.rightMargin: 0
         anchors.bottomMargin: 0
@@ -376,18 +369,19 @@ Page{
                     colorBtnDisable: "#636671"
                     btnDefault: "#1c1d20"
                     iconSource: "../../images/svg_images/Arriba.png"
-                    onClicked: {
+
+                    onReleased: {
+                        backendPython.stopElevacion()
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
-                    }
-                    onReleased: {
-                        internal.sendCommandToBackend(btnStopElevacion)
-                        console.log(internal.getTime() + " --- Parando acimut")
+                        console.log(internal.getTime() + " --- Deteniendo elevación")
                     }
                     onPressed:{
+                        if(!btnArriba.pressAndHold()){
+                            ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
+                            console.log(internal.getTime() + " --- Moviendo antena hacia arriba")
+                        }
                         internal.sendCommandToBackend(btnArriba)
-                        console.log(internal.getTime() + " --- Moviendo antena hacia arriba")
                     }
                 }
 
@@ -401,19 +395,20 @@ Page{
                     width: (gridComandos.width-2*gridComandos.spacing)/3
                     height: (gridComandos.height-gridComandos.spacing)/2
                     iconSource: "../../images/svg_images/Izquierda.png"
-                    onClicked: {
+
+                    onReleased: {
+                        backendPython.stopAcimut()
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Movimiento hacia la izquierda")
-                        internal.sendCommandToBackend(btnIzquierda)
+                        console.log(internal.getTime() + " --- Deteniendo acimut")
                     }
-                    onReleased: {
-                        internal.sendCommandToBackend(btnStopAcimut)
-                        console.log(internal.getTime() + " --- Parando acimut")
-                    }
+
                     onPressed:{
+                        if(!btnIzquierda.pressAndHold()){
+                            ventanaLog.append( internal.getTime() + " --- Movimiento hacia la izquierda")
+                            console.log(internal.getTime() + " --- Movimiento hacia la Izquierda")
+                        }
                         internal.sendCommandToBackend(btnIzquierda)
-                        console.log(internal.getTime() + " --- Movimiento hacia la Izquierda")
                     }
                 }
                 CustomButton{
@@ -421,20 +416,22 @@ Page{
                     width: (gridComandos.width-2*gridComandos.spacing)/3
                     height: (gridComandos.height-gridComandos.spacing)/2
                     iconSource: "../../images/svg_images/Abajo.png"
-                    onClicked:{
+
+                    onReleased: {
+                        backendPython.stopElevacion()
                         internal.disableBusyIndicators()
                         internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Movimiento hacia abajo")
-                        internal.sendCommandToBackend(btnAbajo)
+                        console.log(internal.getTime() + " --- Deteniendo elevación")
                     }
-                    onReleased: {
-                        internal.sendCommandToBackend(btnStopElevacion)
-                        console.log(internal.getTime() + " --- Parando acimut")
-                    }
+
                     onPressed:{
+                        if(!btnAbajo.pressAndHold()){
+                            ventanaLog.append( internal.getTime() + " --- Movimiento hacia abajo")
+                            console.log(internal.getTime() + " --- Movimiento hacia abajo")
+                        }
                         internal.sendCommandToBackend(btnAbajo)
-                        console.log(internal.getTime() + " --- Movimiento hacia abajo")
                     }
+
                 }
                 CustomButton{
                     id:btnDerecha
@@ -442,84 +439,19 @@ Page{
                     height: (gridComandos.height-gridComandos.spacing)/2
                     iconSource: "../../images/svg_images/Derecha.png"
                     onClicked: {
-                        internal.disableBusyIndicators()
-                        internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Movimiento hacia la derecha")
-                        internal.sendCommandToBackend(btnDerecha)
                     }
                     onReleased: {
-                        internal.sendCommandToBackend(btnStopAcimut)
-                        console.log(internal.getTime() + " --- Parando acimut")
+                        backendPython.stopAcimut()
+                        internal.disableBusyIndicators()
+                        internal.showNothingdataTxt()
+                        console.log(internal.getTime() + " --- Deteniendo acimut")
                     }
                     onPressed:{
+                        if(!btnDerecha.pressAndHold()){
+                            ventanaLog.append( internal.getTime() + " --- Movimiento hacia la derecha")
+                            console.log(internal.getTime() + " --- Movimiento hacia la derecha")
+                        }
                         internal.sendCommandToBackend(btnDerecha)
-                        console.log(internal.getTime() + " --- Movimiento hacia la derecha")
-                    }
-                }
-            }
-
-            Column{
-                id: columnStop
-                x: 416
-                width: 110
-                anchors.right: parent.right
-                anchors.top: parent.top
-                anchors.bottom: parent.bottom
-                anchors.rightMargin: 15
-                anchors.bottomMargin: 15
-                anchors.topMargin: 15
-                spacing: 20
-
-                ButtonTracking{
-                    id: btnStopAcimut
-                    width: columnStop.width
-                    height:(columnStop.height-2*columnStop.spacing)/3
-                    text: "Parar Acimut"
-                    font.pointSize: 10
-                    font.italic: true
-                    shadowHorizontal: 5
-                    shadowVertical: 5
-                    onClicked: {
-                        internal.disableBusyIndicators()
-                        internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Detener Acimut")
-                        internal.sendCommandToBackend(btnStopAcimut)
-                    }
-                }
-
-                ButtonTracking{
-                    id:btnStopElevacion
-                    width: columnStop.width
-                    height:(columnStop.height-2*columnStop.spacing)/3
-                    text: "Parar Eleve."
-                    font.pointSize: 10
-                    font.bold: true
-                    font.italic: true
-                    shadowHorizontal: 5
-                    shadowVertical: 5
-                    onClicked: {
-                        internal.disableBusyIndicators()
-                        internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Detener Elevación")
-                        internal.sendCommandToBackend(btnStopElevacion)
-                    }
-                }
-
-                ButtonTracking{
-                    id:btnStop
-                    width: columnStop.width
-                    height:(columnStop.height-2*columnStop.spacing)/3
-                    text: "Parar Todo"
-                    font.pointSize: 10
-                    font.bold: true
-                    font.italic: true
-                    shadowHorizontal: 5
-                    shadowVertical: 5
-                    onClicked: {
-                        internal.disableBusyIndicators()
-                        internal.showNothingdataTxt()
-                        ventanaLog.append( internal.getTime() + " --- Detener Ambos Motores")
-                        internal.sendCommandToBackend(btnStop)
                     }
                 }
             }
@@ -547,6 +479,39 @@ Page{
                     else{
                         internal.enableManualButtons()
                     }
+                }
+            }
+
+            ButtonTracking{
+                id:btnStop
+                x: 416
+                width: 110
+                height:34
+
+                text: "Parar Todo"
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 8
+                anchors.rightMargin: 15
+                font.pointSize: 10
+                font.bold: true
+                font.italic: true
+                shadowHorizontal: 5
+                shadowVertical: 5
+
+                onPressed: {
+                    if(!btnStop.pressAndHold()){
+                        ventanaLog.append( internal.getTime() + " --- Deteniendo movimientos")
+                    }
+                    console.log(internal.getTime() + " --- Deteniendo movimientos")
+                    internal.sendCommandToBackend(btnStop)
+                }
+
+                onReleased: {
+                    internal.disableBusyIndicators()
+                    internal.showNothingdataTxt()
+                    checkBoxManual.checkable = true
+                    checkBoxManual.checked = false
                 }
             }
         }
@@ -811,7 +776,7 @@ Page{
             anchors.bottom: parent.bottom
             anchors.topMargin: 264
             anchors.leftMargin: 605
-            anchors.bottomMargin: 8
+            anchors.bottomMargin: 10
             anchors.rightMargin: 25
             radius: 15
             border.width: 3
@@ -874,6 +839,9 @@ Page{
             //Guardado de la información de LOG cada "X" de tiempo. Este "X" se define en el backend de Python
         }
 
+        function onCleanLogAvalible(){
+            ventanaLog.clear()
+        }
 
     }
 }

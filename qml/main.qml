@@ -90,7 +90,6 @@ Window {
         function disableButtonsMenu(){
             btnHome.isActiveMenu = false
             btnSettings.isActiveMenu = false
-            btnManual.isActiveMenu = false
             btnTracking.isActiveMenu = false
         }
 
@@ -108,11 +107,6 @@ Window {
                 case btnHome:
                     disableViews()
                     viewHomePage.visible = true
-                    break;
-
-                case btnManual:
-                    disableViews()
-                    viewManualPage.visible = true
                     break;
 
                 case btnTracking:
@@ -366,7 +360,9 @@ Window {
 
                         LeftMenuButton {
                             id: btnMenu
+                            width: leftBar.width
                             text: qsTr(" ")
+                            font.italic: true
                             iconSource: "../images/svg_images/menu_icon.svg"
                             iconHeigh: 30
                             layer.textureMirroring: ShaderEffectSource.MirrorVertically
@@ -375,12 +371,22 @@ Window {
                             onClicked:{
                                 animationLeftMenu.running = true
                             }
+                            Text {
+                                id: textMenuButton
+                                text: "Menu Principal"
+                                color: "#ffffff"
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: parent.left
+                                font.italic: true
+                                anchors.leftMargin: 60
+                            }
                         }
 
                         LeftMenuButton {
                             id: btnHome
                             width: leftBar.width
                             text: qsTr("Home")
+                            font.italic: true
                             isActiveMenu: true
                             iconWidth: 30
                             iconHeigh: 30
@@ -393,29 +399,12 @@ Window {
                         }
 
                         LeftMenuButton {
-                            id: btnManual
-                            x: 0
-                            y: 60
-                            width: leftBar.width
-                            text: qsTr("Modo Manual")
-                            iconHeigh: 30
-                            iconWidth: 25
-                            layer.textureMirroring: ShaderEffectSource.MirrorVertically
-                            iconSource: "../images/svg_images/icons8-manual-24.png"
-                            onClicked: {
-                                internal.disableButtonsMenu()
-                                btnManual.isActiveMenu = true
-                                //stackView.push(Qt.resolvedUrl("pages/ManualPage.qml"))
-                                internal.setVisibility(btnManual)
-                            }
-                        }
-
-                        LeftMenuButton {
                             id: btnTracking
                             x: 0
                             y: 60
                             width: leftBar.width
-                            text: qsTr("Modo Tracking")
+                            text: qsTr("Tracking")
+                            font.italic: true
                             iconWidth: 25
                             iconHeigh: 30
                             layer.textureMirroring: ShaderEffectSource.MirrorVertically
@@ -437,9 +426,12 @@ Window {
                         text: qsTr("Setting")
                         anchors.left: parent.left
                         anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 0
+                        font.italic: true
+                        iconWidth: 30
+                        iconHeigh: 25
                         clip: false
                         anchors.leftMargin: 0
-                        anchors.bottomMargin: 20
                         iconSource: "../images/svg_images/settings_icon.svg"
                         onClicked: {
                             internal.disableButtonsMenu()
@@ -654,6 +646,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.25}
+    D{i:0;formeditorZoom:0.5}
 }
 ##^##*/
