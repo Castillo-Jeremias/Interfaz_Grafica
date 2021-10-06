@@ -19,15 +19,15 @@ Page{
         id:internal
 
         function enableBusyIndicators(){
-            busyFin.visible=true
-            busyInicio.visible=true
-            busyObj.visible=true
+            //busyFin.visible=true
+            //busyInicio.visible=true
+            //busyObj.visible=true
         }
 
         function disableBusyIndicators(){
-            busyFin.visible=false
-            busyInicio.visible=false
-            busyObj.visible=false
+            //busyFin.visible=false
+            //busyInicio.visible=false
+            //busyObj.visible=false
         }
 
         function disableManualButtons(){
@@ -46,8 +46,7 @@ Page{
 
         function showNothingdataTxt(){
             labelEstActObjetivo.dataTxt = " - - - "
-            labelEstActInicio.dataTxt = " - - - "
-            labelEstActFin.dataTxt = " - - - "
+            labelEstActElevacion.dataTxt = " - - - "
         }
 
         function getTime(){
@@ -56,46 +55,46 @@ Page{
 
         function changeCalibrationText(btn){
             if(btn.text === "Calibrar Home"){
-              btnIniciar.enabled = false
-              btnFinalizar.enabled = false
-              ventanaLog.append(internal.getTime()+" --- Calibrando Home")
-              return "Term. Calibracion"
+                btnIniciar.enabled = false
+                btnFinalizar.enabled = false
+                ventanaLog.append(internal.getTime()+" --- Calibrando Home")
+                return "Term. Calibracion"
             }else{
-              ventanaLog.append(internal.getTime()+" --- Calibración terminada")
-              disableBusyIndicators()
-              showNothingdataTxt()
-              btnIniciar.enabled = true
-              //btnFinalizar.enabled = true
-              return "Calibrar Home"
+                ventanaLog.append(internal.getTime()+" --- Calibración terminada")
+                disableBusyIndicators()
+                showNothingdataTxt()
+                btnIniciar.enabled = true
+                //btnFinalizar.enabled = true
+                return "Calibrar Home"
             }
         }
 
         function sendCommandToBackend(btnClicked){
             switch(btnClicked){
-                case btnArriba:
-                   backendPython.moveUp()
+            case btnArriba:
+                backendPython.moveUp()
                 break
 
-                case btnAbajo:
-                   backendPython.moveDown()
+            case btnAbajo:
+                backendPython.moveDown()
                 break
 
-                case btnIzquierda:
-                   backendPython.moveToLeft()
+            case btnIzquierda:
+                backendPython.moveToLeft()
                 break
 
-                case btnDerecha:
-                   backendPython.moveToRight()
+            case btnDerecha:
+                backendPython.moveToRight()
                 break
 
-                case btnStop:
-                   backendPython.stopEverthing()
+            case btnStop:
+                backendPython.stopEverthing()
                 break
 
             }
         }
 
-}
+    }
 
     Rectangle {
         id: backGroundPage
@@ -135,7 +134,7 @@ Page{
                 Label{
                     id: labelIngresarDatos
                     height: 33
-                    text: "Ingresar Datos"
+                    text: "Datos de Tracking"
 
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -157,15 +156,16 @@ Page{
                 Column{
 
                     id: coloumnTracking
+                    y: 50
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     anchors.bottomMargin: 65
-                    anchors.topMargin: 49
-                    anchors.rightMargin: 45
-                    anchors.leftMargin: 30
-                    spacing: 15
+                    anchors.topMargin: 50
+                    anchors.rightMargin: 20
+                    anchors.leftMargin: 20
+                    spacing: 10
 
                     Label_TextEdit{
                         id: labelObjetivo
@@ -202,7 +202,7 @@ Page{
                 }
                 Row{
                     id: rowBtnTracking
-                        //3*btnIniciar.width+2*rowBtnTracking.spacing
+                    //3*btnIniciar.width+2*rowBtnTracking.spacing
 
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -210,8 +210,8 @@ Page{
                     anchors.bottom: parent.bottom
                     anchors.topMargin: 15
                     anchors.bottomMargin: 15
-                    anchors.leftMargin: 30
-                    anchors.rightMargin: 45
+                    anchors.leftMargin: 20
+                    anchors.rightMargin: 20
                     spacing: 10
 
                     ButtonTracking{
@@ -229,8 +229,7 @@ Page{
                             internal.disableBusyIndicators()
 
                             labelEstActObjetivo.dataTxt = labelObjetivo.dataTxt
-                            labelEstActInicio.dataTxt = labelInicio.dataTxt
-                            labelEstActFin.dataTxt = labelFin.dataTxt
+                            labelEstActElevacion.dataTxt = labelInicio.dataTxt
 
                             btnIniciar.enabled = false
                             btnCalibrar.enabled = false
@@ -265,7 +264,7 @@ Page{
                                 checkBoxManual.checked = true
                                 checkBoxManual.checkable = false
                                 btnDetenerContinuar.text = "Detener Tracking"
-                                }
+                            }
                         }
                     }
                     ButtonTracking{
@@ -286,8 +285,7 @@ Page{
                             internal.disableBusyIndicators()
 
                             labelEstActObjetivo.dataTxt = " - - - "
-                            labelEstActInicio.dataTxt = " - - - "
-                            labelEstActFin.dataTxt = " - - - "
+                            labelEstActElevacion.dataTxt = " - - - "
 
                             ventanaLog.append( internal.getTime() +" --- Tracking Finalizado")
 
@@ -313,8 +311,7 @@ Page{
                         onClicked: {
                             internal.enableBusyIndicators()
                             labelEstActObjetivo.dataTxt = "Calibrando...       "
-                            labelEstActInicio.dataTxt = "Calibrando...       "
-                            labelEstActFin.dataTxt = "Calibrando...       "
+                            labelEstActElevacion.dataTxt = "Calibrando...       "
                             btnCalibrar.text = internal.changeCalibrationText(btnCalibrar)
                         }
                     }
@@ -345,10 +342,10 @@ Page{
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                anchors.topMargin: 59
-                anchors.bottomMargin: 16
-                anchors.leftMargin: 31
-                anchors.rightMargin: 157
+                anchors.topMargin: 51
+                anchors.bottomMargin: 24
+                anchors.leftMargin: 75
+                anchors.rightMargin: 75
                 clip: false
                 flow: Grid.LeftToRight
                 spacing: 10
@@ -358,7 +355,7 @@ Page{
                 Rectangle{
                     width: (gridComandos.width-2*gridComandos.spacing)/3
                     height: (gridComandos.height-2*gridComandos.spacing)/3
-                    color: "#00000000"  
+                    color: "#00000000"
                 }
 
                 CustomButton{
@@ -485,14 +482,14 @@ Page{
             ButtonTracking{
                 id:btnStop
                 x: 416
-                width: 110
+                width: 118
                 height:34
 
                 text: "Parar Todo"
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.topMargin: 8
-                anchors.rightMargin: 15
+                anchors.rightMargin: 20
                 font.pointSize: 10
                 font.bold: true
                 font.italic: true
@@ -556,86 +553,100 @@ Page{
                 }
                 Column{
                     id: columnDataEstadoActual
+                    y: 50
                     width: 440
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.top: labelEstadoActual.bottom
+                    anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 20
+                    anchors.bottomMargin: 87
                     anchors.rightMargin: 20
                     anchors.leftMargin: 20
-                    anchors.topMargin: 10
-                    spacing: 20
+                    anchors.topMargin: 50
+                    spacing: 25
 
                     Label_TextEdit{
                         id: labelEstActObjetivo
                         width: parent.width
-                        height: (columnDataEstadoActual.height-2*columnDataEstadoActual.spacing)/3
-                        text: "Objetivo"
+                        height: (columnDataEstadoActual.height-columnDataEstadoActual.spacing)/2
+                        text: "Azimut"
                         altotxt: 12
                         dataTxt: " - - - "
-                        CustomBusyIndicator{
-                            id:busyObj
-                            width: 50
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            anchors.topMargin: 0
-                            anchors.bottomMargin: 0
-                            anchors.rightMargin: 0
-                        }
                     }
 
                     Label_TextEdit{
-                        id: labelEstActInicio
+                        id: labelEstActElevacion
                         width: parent.width
-                        height: (columnDataEstadoActual.height-2*columnDataEstadoActual.spacing)/3
-                        text: "Inicio"
+                        height: (columnDataEstadoActual.height-columnDataEstadoActual.spacing)/2
+                        text: "Elevación"
                         altotxt: 12
                         dataTxt: " - - - "
-                        CustomBusyIndicator{
-                            id:busyInicio
-                            width: 50
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            anchors.topMargin: 0
-                            anchors.bottomMargin: 0
-                            anchors.rightMargin: 0
-                        }
-                    }
-
-                    Label_TextEdit{
-                        id: labelEstActFin
-                        width: parent.width
-                        height: (columnDataEstadoActual.height-2*columnDataEstadoActual.spacing)/3
-                        text: "Fin..."
-                        altotxt: 12
-                        dataTxt: " - - - "
-                        CustomBusyIndicator{
-                            id:busyFin
-                            width: 50
-                            anchors.right: parent.right
-                            anchors.top: parent.top
-                            anchors.bottom: parent.bottom
-                            anchors.topMargin: 0
-                            anchors.bottomMargin: 0
-                            anchors.rightMargin: 0
-                        }
                     }
                 }
 
-                Row{
-                    id: rowAcimutElevacion
+                Rectangle {
+                    id: conteinerLucesEstAct
+                    y: 158
+                    width: 523
+                    height: 48
+                    color: "#00000000"
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    anchors.top: columnDataEstadoActual.bottom
                     anchors.leftMargin: 40
                     anchors.rightMargin: 40
-                    anchors.topMargin: 30
-                    layoutDirection: Qt.LeftToRight
-                    clip: true
-                    spacing: 20
+
+                    Rectangle {
+                        id: rectangle
+                        width: 50
+                        height: 20
+                        color: "#00ff00"
+                        radius: 10
+                        border.width: 2
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.topMargin: 0
+                        anchors.leftMargin: 20
+                    }
+
+                    Rectangle {
+                        id: rectangle1
+                        y: 28
+                        width: 50
+                        height: 20
+                        color: "#ff0000"
+                        radius: 30
+                        border.width: 2
+                        anchors.left: parent.left
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 0
+                        anchors.leftMargin: 20
+                    }
+
+                    Text {
+                        id: text1
+                        x: 85
+                        height: 20
+                        text: qsTr("Tracking")
+                        anchors.top: parent.top
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.topMargin: 0
+                    }
+
+                    Text {
+                        id: text2
+                        x: 84
+                        y: 30
+                        height: 20
+                        text: "Comunicacion USB"
+                        anchors.bottom: parent.bottom
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.bottomMargin: 0
+                        minimumPixelSize: 12
+                    }
                 }
 
             }
@@ -704,13 +715,13 @@ Page{
 
             ButtonTracking {
                 id: buttonSave
-                width: 110
+                width: 118
                 height: 30
                 text: qsTr("Save Log")
                 anchors.right: parent.right
                 anchors.top: parent.top
                 anchors.topMargin: 8
-                anchors.rightMargin: 15
+                anchors.rightMargin: 20
                 onClicked: {
                     // Abre la ventana de Windows para seleccionar una dirección
                     fileSave.open()
@@ -718,7 +729,7 @@ Page{
 
                 ButtonTracking{
                     id: buttonClear
-                    width: 110
+                    width: 118
                     height: 30
                     text: qsTr("Clear log")
                     anchors.right: parent.right
@@ -783,48 +794,155 @@ Page{
 
             Rectangle{
                 id:containerAngulos
+                x: 0
+                y: 0
                 color: "#00000000"
                 border.width: 0
                 anchors.fill: parent
 
                 CircularGauge {
-                    id: circularGauge
-                    x: 38
-                    width: 250
+                    id: gaugeElevacion
+                    x: 316
+                    width: containerAngulos.width/2 - 30
                     height: 250
-
                     anchors.right: parent.right
+
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     anchors.rightMargin: 20
-                    anchors.bottomMargin: 43
-                    anchors.topMargin: 43
+                    anchors.bottomMargin: 40
+                    anchors.topMargin: 40
 
+                    //Máximo valor y minímo de la escala a representar
+                    maximumValue: 90
+                    minimumValue: -90
 
+                    //Minímo offset de valor para mover la aguja del gauge
+                    stepSize: 0.1
+
+                    value: 0
                     style: CircularGaugeStyle{
-                        minimumValueAngle: -180
-                        maximumValueAngle : 180
+                        //tickmarkLabel: null     // Label que viene por defecto OFF
+                        minimumValueAngle: -90
+                        maximumValueAngle : 90
+                        minorTickmarkCount: 4
+                        labelStepSize: 20
+
+                        tickmarkLabel: Text{
+                            text: styleData.value
+                            color: "#ffffff"
+                            font.pixelSize: 13
+                        }
                     }
                 }
 
                 CircularGauge {
-                    id: circularGauge2
-                    width: 250
-                    height: 250
-
+                    id: gaugeAcimut
+                    width: containerAngulos.width/2 - 30
+                    height: containerAngulos.width - 20
                     anchors.left: parent.left
+
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
-                    anchors.leftMargin: 41
-                    anchors.bottomMargin: 43
-                    anchors.topMargin: 43
+                    anchors.leftMargin: 20
 
+                    anchors.bottomMargin: 40
+                    anchors.topMargin: 40
+
+                    //Máximo valor y minímo de la escala a representar
+                    maximumValue: 360
+                    minimumValue: 0
+
+                    //Minímo offset de valor para mover la aguja del gauge
+                    stepSize: 0.1
 
                     style: CircularGaugeStyle{
+                        //tickmarkLabel: null     // Label que viene por defecto OFF
                         minimumValueAngle: -180
                         maximumValueAngle : 180
+                        minorTickmarkCount: 4
+                        labelStepSize: 20
+
+                        tickmarkLabel: Text{
+                            text: styleData.value
+                            color: "#ffffff"
+                            font.pixelSize:  14
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: conteinerLucesAngulos
+                    x: 314
+                    y: 241
+                    width: 244
+                    height: 73
+                    color: "#00000000"
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: 20
+                    anchors.rightMargin: 30
+
+                    Rectangle {
+                        id: rectangle2
+                        x: 61
+                        width: 100
+                        height: 30
+                        color: "#00ff00"
+                        radius: 24
+                        border.width: 2
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        anchors.topMargin: 0
+                        anchors.rightMargin: 0
                     }
 
+                    Rectangle {
+                        id: rectangle3
+                        x: 62
+                        y: 67
+                        width: 100
+                        height: 30
+                        color: "#00ff00"
+                        radius: 30
+                        border.width: 2
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 0
+                        anchors.rightMargin: 0
+                    }
+
+                    Text {
+                        id: text3
+                        x: 13
+                        width: 111
+                        height: 30
+                        text: "Indicador Azimut"
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.topMargin: 0
+                        anchors.rightMargin: 110
+                        minimumPixelSize: 12
+                    }
+
+                    Text {
+                        id: text4
+                        x: 18
+                        y: 43
+                        height: 30
+                        text: "Indicador Elevación"
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        font.pixelSize: 12
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.rightMargin: 110
+                        minimumPixelSize: 12
+                        anchors.bottomMargin: 0
+                    }
                 }
 
             }
@@ -848,6 +966,7 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5;height:608;width:1218}
+    D{i:0;formeditorZoom:1.1;height:608;width:1218}D{i:32}D{i:33}D{i:34}D{i:35}D{i:31}
+D{i:54}D{i:55}D{i:56}D{i:57}D{i:53}
 }
 ##^##*/

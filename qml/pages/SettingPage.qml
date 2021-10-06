@@ -1,5 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.15
+import QtQuick.Dialogs 1.3
+import "../controls"
 
 Page{
     id: id_setting_page
@@ -27,6 +29,38 @@ Page{
             anchors.leftMargin: 20
             anchors.topMargin: 10
             anchors.bottomMargin: 10
+
+            Rectangle {
+                id: containerComandosToShow
+                color: "#ffffff"
+                anchors.fill: parent
+                anchors.rightMargin: 3
+                anchors.leftMargin: 3
+                anchors.bottomMargin: 3
+                anchors.topMargin: 3
+
+                ScrollView {
+                    id: scrollViewVentanaComandosToShow
+                    anchors.fill: parent
+                    font.pointSize: 15
+                    font.italic: true
+                    TextEdit{
+                        id: ventanaComandosToShow
+                        anchors.fill: parent
+                        cursorVisible: true
+
+                        selectionColor: "#8c8c8c"
+                        selectByMouse: true
+                        clip: true
+
+                        font.italic: true
+                        font.pointSize: 10
+
+                        readOnly: true
+                    }
+                }
+
+            }
         }
 
         Rectangle {
@@ -44,6 +78,26 @@ Page{
             anchors.leftMargin: 605
             anchors.topMargin: 10
             anchors.rightMargin: 25
+
+
+            CustomComboBox{ x: 37;y: 47;width: 200 ;height: 30}
+
+            Label {
+                id: label
+                x: 8
+                y: 8
+                text: qsTr("Configuración - Puerto Serie")
+                font.italic: true
+                font.bold: true
+                font.pointSize: 20
+            }
+
+            Button {
+                id: button
+                x: 78
+                y: 92
+                text: qsTr("Cargar configuración")
+            }
         }
 
         Rectangle {
@@ -69,6 +123,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:0.5;height:608;width:1218}D{i:2}D{i:3}D{i:4}
+    D{i:0;autoSize:true;formeditorZoom:0.5;height:608;width:1218}D{i:4;invisible:true}
 }
 ##^##*/

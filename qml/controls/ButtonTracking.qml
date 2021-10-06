@@ -11,7 +11,7 @@ Button{
     font.italic: true
 
     property color btnDefault: "#1c1d20"
-    property color btnMouseOver: "#23272E"
+    property color btnMouseOver: "#33353a"
     property color btnColorClicked: "#00a1f1"
     property color colorBtnDisable:"#767a87"
     property int shadowHorizontal: 3

@@ -7,7 +7,7 @@ Button{
 
     property url iconSource: "../../images/svg_images/menu_icon.svg"
     property color btnDefault: "#1c1d20"
-    property color btnMouseOver: "#485161"
+    property color btnMouseOver: "#33353a"
     property color btnColorClicked: "#00a1f1"
     property color colorBtnDisable:"#636671"
     property int shadowHorizontal: 5

@@ -1,7 +1,6 @@
 # This Python file uses the following encoding: utf-8
-import os, sys
+import os, sys, datetime, getpass
 from pathlib import Path
-import datetime,getpass
 
 from PySide2.QtGui import QGuiApplication
 from PySide2.QtQml import QQmlApplicationEngine

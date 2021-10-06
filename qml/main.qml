@@ -11,7 +11,7 @@ Window {
     id: mainwindow
     visible: true
     color: "#00000000"
-    title: "mainWindow"
+    title: "GroundStationController"
 
     height: 700
     width: 1300
@@ -333,6 +333,7 @@ Window {
                     anchors.left: parent.left
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
+                    z: 1
                     clip: true
                     anchors.leftMargin: 0
                     anchors.bottomMargin: 0
@@ -347,13 +348,14 @@ Window {
                             }else{
                                 return 60
                             }
-                        duration: 1000
+                        duration: 1200
                         easing.type:  Easing.InOutQuint
                     }
 
                     Column {
                         id: column
                         anchors.fill: parent
+                        spacing: 2
                         anchors.topMargin: 0
                         anchors.bottomMargin: 60
                         clip: true
@@ -403,7 +405,7 @@ Window {
                             x: 0
                             y: 60
                             width: leftBar.width
-                            text: qsTr("Tracking")
+                            text: qsTr("Antena")
                             font.italic: true
                             iconWidth: 25
                             iconHeigh: 30
@@ -445,13 +447,13 @@ Window {
                 Rectangle {
                     id: contentPage
                     color: "#2c313b"
-                    anchors.left: leftBar.right
+                    anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: parent.bottom
                     clip: true
                     anchors.bottomMargin: 20
-                    anchors.leftMargin: 0
+                    anchors.leftMargin: 60
 
                     Loader{
                         id:viewHomePage
