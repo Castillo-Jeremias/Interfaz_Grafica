@@ -11,7 +11,7 @@ Button{
     property int shadowVertical: 5
     property int shadowHorizontal: 5
     property bool enableEditData: false
-
+    property int radius_label: 10
     id:id_label_TextEdit
     text: qsTr("Change this text")
 
@@ -25,7 +25,7 @@ Button{
         height: parent.height
         color: backgroundButton
         border.width: 1
-        radius: 10
+        radius: radius_label
     }
 
     DropShadow{

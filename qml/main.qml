@@ -21,8 +21,8 @@ Window {
     minimumWidth:  1300
 
     //Máxima resolución de escritorio tolerada
-    maximumHeight: 1920
-    maximumWidth:  1080
+    maximumHeight: 1080
+    maximumWidth: 1920
 
     // Removemos bordes de de aplicación de Windows
     flags: Qt.Window | Qt.FramelessWindowHint
@@ -32,7 +32,6 @@ Window {
     property int windowMargin: 10
 
     // Funciones internas
-
     QtObject{
         id:internal
 
@@ -104,27 +103,48 @@ Window {
 
             switch(btnClicked){
 
-                case btnHome:
-                    disableViews()
-                    viewHomePage.visible = true
-                    break;
+            case btnHome:
+                disableViews()
+                viewHomePage.visible = true
+                break;
 
-                case btnTracking:
-                    disableViews()
-                    viewTrackingPage.visible = true
-                    break;
+            case btnTracking:
+                disableViews()
+                viewTrackingPage.visible = true
+                break;
 
-                case btnSettings:
-                    disableViews()
-                    viewSettingPage.visible = true
-                    break;
+            case btnSettings:
+                disableViews()
+                viewSettingPage.visible = true
+                break;
             }
         }
     }
 
-
-
     Rectangle {
+        Keys.onPressed:{
+            if(event.key === Qt.Key_Up && viewTrackingPage.visible){
+                //console.log("[Main Page] Cambiando foco a TrackingView")
+                viewTrackingPage.forceActiveFocus()
+                event.accepted = true
+            }
+            if(event.key === Qt.Key_Down && viewTrackingPage.visible){
+                //console.log("[Main Page] Cambiando foco a TrackingView")
+                viewTrackingPage.forceActiveFocus()
+                event.accepted = true
+            }
+            if(event.key === Qt.Key_Left && viewTrackingPage.visible){
+                //console.log("[Main Page] Cambiando foco a TrackingView")
+                viewTrackingPage.forceActiveFocus()
+                event.accepted = true
+            }
+            if(event.key === Qt.Key_Right && viewTrackingPage.visible){
+                //console.log("[Main Page] Cambiando foco a TrackingView")
+                viewTrackingPage.forceActiveFocus()
+                event.accepted = true
+            }
+
+        }
         z:1     // Se generaba un bug que no podiamos ver la interfaz en editor
         id: backGround
         color: "#2c313b"
@@ -324,6 +344,7 @@ Window {
                 anchors.bottomMargin: 0
                 anchors.topMargin: 0
 
+
                 Rectangle {
                     id: leftBar
                     x: 0
@@ -348,14 +369,14 @@ Window {
                             }else{
                                 return 60
                             }
-                        duration: 1200
+                        duration: 1000
                         easing.type:  Easing.InOutQuint
                     }
 
                     Column {
                         id: column
                         anchors.fill: parent
-                        spacing: 2
+                        spacing: 0
                         anchors.topMargin: 0
                         anchors.bottomMargin: 60
                         clip: true
@@ -513,6 +534,7 @@ Window {
                         anchors.rightMargin: 20
                     }
                 }
+
             }
 
             MouseArea {
@@ -632,19 +654,8 @@ Window {
         }
     }
 
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*##^##
 Designer {

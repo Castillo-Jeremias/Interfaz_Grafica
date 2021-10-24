@@ -12,7 +12,6 @@ Button{
     property color colorBtnDisable:"#636671"
     property int shadowHorizontal: 5
     property int shadowVertical: 5
-
     implicitWidth: 200
     implicitHeight: 60
 
