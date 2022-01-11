@@ -11,48 +11,26 @@ import QtQuick.Extras 1.4
 
 Page{
 
-    Keys.onReleased: {
-        if(event.key === Qt.Key_Up && !checkBoxManual.checked){
-            //console.log("[Tracking Page] Tecla Arriba Liberada")
-            btnArriba.down = false
-        }
-
-        if(event.key === Qt.Key_Down && !checkBoxManual.checked){
-            //console.log("[Tracking Page] Tecla Abajo Presionada")
-            btnAbajo.down = false
-        }
-
-        if(event.key === Qt.Key_Left && !checkBoxManual.checked){
-            //console.log("[Tracking Page] Tecla Izquierda Presionada")
-            btnIzquierda.down = false
-       }
-
-        if(event.key === Qt.Key_Right && !checkBoxManual.checked){
-            //console.log("[Tracking Page] Tecla Derecha Presionada")
-            btnDerecha.down = false
-        }
-    }
     /*Ingreso de comandos manuales por teclado*/
     Keys.onPressed:{
         if(event.key === Qt.Key_Up && !checkBoxManual.checked && !btnAbajo.down){
-            event.isAuoRepeat = false
             //console.log("[Tracking Page] Tecla Arriba Presionada")
-            btnArriba.down = true
+            //btnArriba.clicked()
         }
 
         if(event.key === Qt.Key_Down && !checkBoxManual.checked && !btnArriba.down){
             //console.log("[Tracking Page] Tecla Abajo Presionada")
-            btnAbajo.down = true
+            //btnAbajo.clicked()
         }
 
         if(event.key === Qt.Key_Left && !checkBoxManual.checked && !btnIzquierda.down){
             //console.log("[Tracking Page] Tecla Izquierda Presionada")
-            btnIzquierda.down = true
+            //btnIzquierda.clicked()
         }
 
         if(event.key === Qt.Key_Right && !checkBoxManual.checked && !btnDerecha.down){
             //console.log("[Tracking Page] Tecla Derecha Presionada")
-            btnDerecha.down = true
+            btnDerecha.clicked()
         }
 
     }
@@ -481,17 +459,15 @@ Page{
                             }
                             internal.sendCommandToBackend(btnAbajo)
                         }
-
-
                     }
                     CustomButton{
                         id:btnDerecha
                         width: (gridComandos.width-2*gridComandos.spacing)/3
                         height: (gridComandos.height-gridComandos.spacing)/2
                         iconSource: "../../images/svg_images/Derecha.png"
-                        onClicked: {
-                        }
+
                         onReleased: {
+                            btnDerecha.down = false
                             backendPython.stopAcimut()
                             internal.disableBusyIndicators()
                             internal.showNothingdataTxt()
@@ -1005,6 +981,7 @@ Page{
 
     Connections{
         target: backendPython
+        //recordar la preposicion on delante de la funcion
 
         function onActualizarDataToSave(){
             backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
@@ -1020,6 +997,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;height:608;width:1218}
+    D{i:0;formeditorZoom:0.5;height:608;width:1218}
 }
 ##^##*/

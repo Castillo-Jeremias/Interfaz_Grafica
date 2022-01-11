@@ -29,7 +29,6 @@ ComboBox{
     }
     contentItem: Item{
         id: item1
-
         Text{
             id: textComboBox
             y: 0
@@ -41,24 +40,40 @@ ComboBox{
             font.pointSize: 12
             anchors.leftMargin: 10
         }
-
     }
+
     model: ListModel{
         ListElement{
-            text: "Sol"
+            text: "COM1"
         }
         ListElement{
-            text: "Luna"
+            text: "COM2"
         }
         ListElement{
-            text: "Jupiter"
+            text: "COM3"
         }
         ListElement{
-            text: "Otros..."
+            text: "COM4"
+        }
+        ListElement{
+            text: "COM5"
+        }
+        ListElement{
+            text: "COM6"
+        }
+        ListElement{
+            text: "COM7"
+        }
+        ListElement{
+            text: "COM8"
+        }
+        ListElement{
+            text: "COM9"
+        }
+        ListElement{
+            text: "COM10"
         }
     }
-
-
 }
 
 /*##^##
