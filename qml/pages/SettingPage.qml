@@ -73,8 +73,6 @@ Page{
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.bottom: backGroundNumber2.top
-            anchors.bottomMargin: 28
             anchors.leftMargin: 605
             anchors.topMargin: 10
             anchors.rightMargin: 25
@@ -98,6 +96,34 @@ Page{
                 y: 92
                 text: qsTr("Cargar configuración")
             }
+
+            ComboBox {
+                id: mycomboBoxTest
+                x: 278
+                y: 47
+
+                contentItem: Item{
+                    id: item1
+                    Text{
+                        id: textmycomboBoxTest
+                        y: 0
+                        visible: true
+                        text: mycomboBoxTest.currentText
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left: parent.left
+                        color: "#ffffff"
+                        font.pointSize: 12
+                        anchors.leftMargin: 10
+                    }
+                }
+                model: ListModel{
+                    id: listModeltmycomboBoxTest
+                    ListElement{
+                        text: "jere"
+                    }
+                    }
+                }
+            }
         }
 
         Rectangle {
@@ -108,18 +134,33 @@ Page{
             implicitWidth: 588
             radius:15
 
-            anchors.left: backGroundSettingTracking.right
+            anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             anchors.topMargin: 318
-            anchors.leftMargin: 44
+            anchors.leftMargin: 605
             anchors.bottomMargin: 10
             anchors.rightMargin: 25
         }
-    }
 
+    Connections{
+        target: backendPython
+        //recordar la preposicion on delante de la funcion
+
+        /*function onCleanLogAvalible(){
+            ventanaLog.clear()
+        }
+        */
+        function onSetPortCOM(COM_Data){
+
+        }
+    }
 }
+
+
+
+
 
 /*##^##
 Designer {
