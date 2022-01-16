@@ -6,7 +6,7 @@ Es necesario descargar los siguientes paquetes de Python por CMD para ejecutar l
   - pip install PySide2
   - pip install PySide2==5.12.2 --upgrade (Actualización necesaria si la versión de PySide2 es menor a 5.12.2)
  
-  - pip instal PyQt5
+  - pip install PyQt5
 
 Actualizacion (NO NECESARIA) de pip install:
  - pip install --upgrade pip
