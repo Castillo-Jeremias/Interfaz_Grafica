@@ -992,11 +992,14 @@ Page{
             ventanaLog.clear()
         }
 
+        function onCommSerieFailed(msgError){
+            ventanaLog.append(internal.getTime()+ " --- " + msgError)
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5;height:608;width:1218}
+    D{i:0;formeditorZoom:0.66;height:608;width:1218}
 }
 ##^##*/
