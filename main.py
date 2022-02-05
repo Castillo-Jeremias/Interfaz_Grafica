@@ -31,24 +31,36 @@ Name_User = getpass.getuser()
 # ---------- Ruta por defecto para almacenar el archivo de LOG auto guardado --------------
 DEFAULT_URL_LOG = "file:///C:/Users/"+Name_User+"/Desktop/Ground_Station_Log.txt"
 
-# ---------- Auto guardado cada 10 seg --------------
-Tiempo_AutoSave = 10000
+# ---------- Auto guardado cada 60 seg (Si hay cambios) --------------
+Tiempo_AutoSave = 60000
 
-# ---------- Timer de chequeo de puerto serie cada 15 seg --------------
-Tiempo_Check_Ports = 15000
+# ---------- Timer de chequeo de puerto serie cada 30 seg --------------
+Tiempo_Check_Ports = 10000
 
-# ---------- Timer de chequeo de tracking cada 30 seg --------------
-Tiempo_Tracking = 30000
+# ---------- Timer de chequeo de tracking cada 60 seg --------------
+Tiempo_Tracking = 60000
 
 # ---------- Conexión con el puerto serie --------------
-
 Flag_recep = False
-flag1 = True
-acimut = 0
-elevacion = 0
 data_acimut = -99       # Valor no valido
 data_elevacion = -99    # Valor no valido
 
+# ======================================== TO DO ======================================== #
+'''
+   Nota: Mientra más asteriscos tengo más importante es la cosa
+
+   *** Testeo contra la placa si detecta todo como debe.
+
+   * Modificar la función statusPortCOM de manera que solo modifique el color (signal to frontend) cuando se detecte que
+     el puerto serie "desaparecio". Hay que sacar todos los comentarios y esas boludeces más que nada.
+
+   * Poner una animación de tracking para que se vea en el front que esta haciendo tracking y no se genere algún bardo.
+
+   ** Continuación con la parte gráfica, borrar la pestaña de settings y colocar una pestaña de ayuda para generar el
+     el archivo de texto y colo medianamente hacer las cosas para no manquearla.
+
+'''
+# ======================================================================================= #
 class VentanaPrincipal(QObject):
 
     # ======================================== Señales a emitir ======================================== #
@@ -308,60 +320,39 @@ class VentanaPrincipal(QObject):
     #                                   Funciones vinculadas con el tracking                                    #
     #############################################################################################################
 
-
-#HAY QUE VER LA LÓGICA QUE USO SEBA PARA DEFINIR LA FLAG Y ESO PERO ESTARIA EL ENVIO REALIZADO CADA 30 SEG
-# PENSAR ALGUNA FORMA DE QUE SE HAGA 1 ENVIO SIN USO DE BANDERAS
     def Control_autonomo(self):
-        global data_acimut
-        global data_elevacion
-        global flag1
+       global data_acimut
+       global data_elevacion
+       global Flag_Enable_Send
 
-        lineasleidas = 0
-        hora_actual = time.strftime('%H:%M')
-        """ -------- Solicito fecha y la genero al formato para comparar con el archivo ----------"""
-        fecha_sin_analizar= time.strftime('%m/%d/%y')
-        objDate = datetime.strptime(fecha_sin_analizar,'%m/%d/%y')
-        fecha=datetime.strftime(objDate, '%Y-%b-%d')
+       hora_actual = time.strftime('%H:%M')
+       """ -------- Solicito fecha y la genero al formato para comparar con el archivo ----------"""
+       fecha_sin_analizar= time.strftime('%m/%d/%y')
+       objDate = datetime.strptime(fecha_sin_analizar,'%m/%d/%y')
+       fecha=datetime.strftime(objDate, '%Y-%b-%d')
 
-        file = open("comandos4.txt",'r')
+       file = open("comandos4.txt",'r')
 
-        total_lines = sum(1 for line in file)
+       total_lines = sum(1 for line in file)
 
-        file.seek(0)
+       file.seek(0)
 
-        linea = file.readline()
-        while len(linea) > 0:
-            dato1 = linea.split(',')
-            if dato1[0] != '\n':
-                if dato1[1] == hora_actual and fecha == dato1[0]:
-                    if flag1:
-                        data_acimut=dato1[2]
-                        data_elevacion=dato1[3]
+       linea = file.readline()
+       while len(linea) > 0:
+           dato1 = linea.split(',')
+           if dato1[0] != '\n':
+               if fecha == dato1[0] and dato1[1] == hora_actual:
+                  data_acimut=dato1[2]
+                  data_elevacion=dato1[3]
+                  parametros="P"+str(float(dato1[2]))+" "+str(float(dato1[3]))
+                  #ser.write(parametros.encode('ascii')+ b'\r')
+                  print(parametros.encode('ascii')+ b'\r')
+                  break
+           linea = file.readline()
 
-                        parametros="P"+str(float(dato1[2]))+" "+str(float(dato1[3]))
-
-                        #ser.write(parametros.encode('ascii')+ b'\r')
-                        print(parametros.encode('ascii')+ b'\r')
-                        print("envie comando")
-
-                        flag1=False
-                        lineasleidas=lineasleidas+1
-
-                    if (float(data_acimut)!=float(dato1[2])) | (float(data_elevacion)!=float(dato1[3])):
-                        #Tracking(float(dato1[2]), float(dato1[3]))
-                        data_acimut = dato1[2]
-                        data_elevacion = dato1[3]
-                        lineasleidas += 1
-
-            linea = file.readline()
-        return 0
-
-        if total_lines==lineasleidas:
-            return 1
     #############################################################################################################
     #                                   Fin funciones vinculadas con el tracking                                #
     #############################################################################################################
-
 
 if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
