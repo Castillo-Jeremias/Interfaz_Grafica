@@ -14,5 +14,6 @@ Actualizacion (NO NECESARIA) de pip install:
 Si llega a existir algun problema a la hora de ejecutar el main.py, descargar también 
   
   - pip install pyqt5-tools
+  - pip install pyserial
 
 Chequear que ambos se hayan instaldo correctamente buscando en el explorador de archivos en el disco principal
