@@ -752,7 +752,7 @@ Page{
                         anchors.rightMargin: 40
 
                         Rectangle {
-                            id: rectangle
+                            id: statusTracking
                             width: 50
                             height: 20
                             color: "#ff0000"
@@ -765,7 +765,7 @@ Page{
                         }
 
                         Rectangle {
-                            id: rectangle1
+                            id: statusCommUSB
                             y: 28
                             width: 50
                             height: 20
@@ -995,11 +995,37 @@ Page{
         function onCommSerieFailed(msgError){
             ventanaLog.append(internal.getTime()+ " --- " + msgError)
         }
+
+        function onActual_graf_grados_signal(acimut,elevacion){
+            ventanaLog.append(internal.getTime()+ " --- " + "acimut:" + acimut + " ; Elevacion:" + elevacion)
+        }
+
+        function onSignal_To_FrontEnd(Identificador){
+            console.log("Cambiando color")
+            if(Identificador === "USB - True"){
+                statusCommUSB.color = "#00ff00"
+            }
+            if(Identificador === "USB - Problem"){
+                statusCommUSB.color = "#fff700"
+            }
+            if(Identificador === "USB - False"){
+                statusCommUSB.color = "#ff0000"
+            }
+            if(Identificador === "Tracking - ON"){
+                statusTracking.color = "#00ff00"
+            }
+
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.66;height:608;width:1218}
+    D{i:0;formeditorZoom:0.66;height:608;width:1218}D{i:1}D{i:6}D{i:8}D{i:9}D{i:10}D{i:7}
+D{i:12}D{i:13}D{i:14}D{i:15}D{i:11}D{i:5}D{i:4}D{i:18}D{i:19}D{i:20}D{i:21}D{i:22}
+D{i:23}D{i:17}D{i:24}D{i:25}D{i:16}D{i:30}D{i:28}D{i:27}D{i:32}D{i:33}D{i:31}D{i:34}
+D{i:26}D{i:3}D{i:38}D{i:40}D{i:41}D{i:39}D{i:43}D{i:44}D{i:45}D{i:46}D{i:42}D{i:37}
+D{i:36}D{i:49}D{i:52}D{i:56}D{i:57}D{i:58}D{i:59}D{i:55}D{i:48}D{i:47}D{i:35}D{i:2}
+D{i:60}
 }
 ##^##*/
