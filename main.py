@@ -34,8 +34,8 @@ DEFAULT_URL_LOG = "file:///C:/Users/"+Name_User+"/Desktop/Ground_Station_Log.txt
 # ---------- Auto guardado cada 60 seg (Si hay cambios) --------------
 Tiempo_AutoSave = 60000
 
-# ---------- Timer de chequeo de puerto serie cada 30 seg --------------
-Tiempo_Check_Ports = 10000
+# ---------- Timer de chequeo de puerto serie cada 15 seg --------------
+Tiempo_Check_Ports = 15000
 
 # ---------- Timer de chequeo de tracking cada 60 seg --------------
 Tiempo_Tracking = 60000
@@ -84,7 +84,7 @@ class VentanaPrincipal(QObject):
     # Señal donde se envia el puerto serie a la UI
     setPortCOM = Signal(str)
 
-    #Señal de error
+    #Señal de error de envio por puerto serie
     commSerieFailed = Signal(str)
 
     # Señal de actualizacion de los grados graficos
@@ -235,7 +235,7 @@ class VentanaPrincipal(QObject):
 
     def statusPortCOM(self):
         # Deben de ser ingresado en formato hexadecimal (sin 0x), sino no podran ser encontrados
-        # ID: 0x6860 (o ID: 27620) -> 6860
+        # ID: 0x6860 (o ID: 27620) -> 6860 (HEXADECIMAL)
         list_PID = ['6860','6001']
         list_VID = ['04E8','0403']
 
@@ -248,8 +248,8 @@ class VentanaPrincipal(QObject):
 
             if (len(Device_To_Found) != 0):
                 for USB_Port in list(serial.tools.list_ports.grep(list_VID[Index] + ':' + list_PID[Index])):
-                    print('\n* =================================== Puerto encontrado =================================== *')
-                    print('\t\t\tCOM utilizado: ' + USB_Port.device)
+                    print('\n* =================================== Puerto Encontrado =================================== *')
+                    print('\t\t\tCOM Utilizado: ' + USB_Port.device)
                     VID = '0x' + USB_Port.hwid[12:16]
                     PID = '0x' + USB_Port.hwid[17:21]
                     print('\t\t\tVID: ' + VID)
@@ -259,26 +259,26 @@ class VentanaPrincipal(QObject):
                     if (VID == '0x0403' and PID == '0x6001'):  # Parche para que no genere bardo con mi telefono xd
                         try:
                             if(Serial_PORT.is_open == False):
-                                print("Intentando conectar con " + USB_Port.device + "...")
+                                print("Intentando Conectar con " + USB_Port.device + "...")
                                 Serial_PORT.port = USB_Port.device
                                 #Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
                                 Serial_PORT.baudrate = 9600
                                 Serial_PORT.open()
-                                print("¡" + USB_Port.device + " conectado correctamente!")
-                                self.signal_To_FrontEnd.emit("USB","True")
+                                print("¡" + USB_Port.device + " Conectado Correctamente!")
+                                self.signal_To_FrontEnd.emit("USB","Good")
                         except(serial.SerialException):
                             if(Serial_PORT.is_open == True):
-                                print("* ==== Error ==== * - Se detecto un problema en el puerto " + USB_Port.device + "cuyo VID:PID es 0x" + list_VID[Index] + ":0x" + list_PID[Index])
+                                print("* ==== Error ==== * - Se Detecto un Problema en el Puerto " + USB_Port.device + "Cuyo VID:PID es 0x" + list_VID[Index] + ":0x" + list_PID[Index])
                                 self.signal_To_FrontEnd.emit("USB","Problem")
                             if(Serial_PORT.is_open == False):
-                                print("* ==== Error ==== * - El puerto " + USB_Port.device + "no se encuentra abierto...")
+                                print("* ==== Error ==== * - El Puerto " + USB_Port.device + "no se Encuentra Abierto...")
                                 self.signal_To_FrontEnd.emit("USB","Bad")
             else:
                 print('\n* =================================== Notificación =================================== *')
-                print("\t No se encontro ningún dispositivo cuyo par VID:PID sea 0x" + list_VID[Index] + ':0x' + list_PID[Index])
+                print("\t No se Encontro Ningún Dispositivo Cuyo par VID:PID sea 0x" + list_VID[Index] + ':0x' + list_PID[Index])
                 print('* =================================================================================== *')
                 if(Serial_PORT.is_open == True):
-                    self.signal_To_FrontEnd.emit("USB","False")
+                    self.signal_To_FrontEnd.emit("USB","Bad")
                     Serial_PORT.close()
                     print (Serial_PORT.is_open)
 
@@ -297,9 +297,10 @@ class VentanaPrincipal(QObject):
         texto = b'U\r'
         try:
             Serial_PORT.write(texto)
+            self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-            self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Arriba")
+            self.commSerieFailed.emit("[Mov. Arriba]: Falla de Envió por Puerto Serie")
+            self.signal_To_FrontEnd.emit("USB","Problem")
 
     # D // DOWN Direction Rotation
     @Slot()
@@ -308,9 +309,10 @@ class VentanaPrincipal(QObject):
         texto = b'D\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Abajo")
+           self.commSerieFailed.emit("[Mov. Abajo]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     #R // Clockwise Rotation
     @Slot()
@@ -319,9 +321,10 @@ class VentanaPrincipal(QObject):
         texto = b'R\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Derecha")
+           self.commSerieFailed.emit("[Mov. Drcha]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     #L// Counter Clockwise Rotation
     @Slot()
@@ -330,9 +333,10 @@ class VentanaPrincipal(QObject):
         texto = b'L\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Izquierda")
+           self.commSerieFailed.emit("[Mov. Izq]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     # A // CW/CCW Rotation Stop
     @Slot()
@@ -341,9 +345,10 @@ class VentanaPrincipal(QObject):
         texto = b'A\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Parando Acimut")
+           self.commSerieFailed.emit("[Stop Acimut]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     # E // UP/DOWN Direction Rotation Stop
     @Slot()
@@ -352,9 +357,10 @@ class VentanaPrincipal(QObject):
         texto = b'E\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Parando Elevación")
+           self.commSerieFailed.emit("[Stop Elevación]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     # E // UP/DOWN Direction Rotation Stop
     @Slot()
@@ -363,9 +369,10 @@ class VentanaPrincipal(QObject):
         texto = b'S\r'
         try:
            Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
-           self.commSerieFailed.emit("Falla de envió por puerto serie")
-        #print("Parando todo")
+           self.commSerieFailed.emit("[Stop Global]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
 
     #############################################################################################################
     #                                         Fin comando manuales                                              #
@@ -392,7 +399,7 @@ class VentanaPrincipal(QObject):
            total_lines = sum(1 for line in file)
            file.seek(0)
        except:
-           print("No se encontro el archivo de comando")
+           print("No Se Encontro el Archivo de Comandos")
            file.close()
            return
 
@@ -415,6 +422,24 @@ class VentanaPrincipal(QObject):
            linea = file.readline()
     #############################################################################################################
     #                                   Fin funciones vinculadas con el tracking                                #
+    #############################################################################################################
+
+    #############################################################################################################
+    #                                 Funciones vinculadas con solicitud de ángulos                             #
+    #############################################################################################################
+
+    def Actualizacion_Posicion(self):
+        #comando a enviar: "B\r"
+        texto = b'B\r'
+        try:
+           Serial_PORT.write(texto)
+           self.signal_To_FrontEnd.emit("USB","Good")
+        except(serial.SerialException):
+           self.commSerieFailed.emit("[Act. Posición]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB","Problem")
+
+    #############################################################################################################
+    #                                 Fin funciones vinculadas con solicitud de ángulos                         #
     #############################################################################################################
 
 if __name__ == "__main__":
