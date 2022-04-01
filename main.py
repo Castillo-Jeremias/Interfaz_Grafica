@@ -40,8 +40,8 @@ Tiempo_Check_Ports = 15000
 # ---------- Timer de chequeo de tracking cada 60 seg --------------
 Tiempo_Tracking = 60000
 
-# ---------- Timer de actualizacion de graficos cada 10 seg --------------
-#Tiempo_actualizacion_graf = 10000
+# ---------- Timer de actualizacion de graficos cada 30 seg --------------
+#Tiempo_Actualizacion_Graf = 30000
 
 # ---------- Conexión con el puerto serie --------------
 #Serial_PORT = serial.Serial()
@@ -53,16 +53,16 @@ data_elevacion = -99    # Valor no valido
 '''
    Nota: Mientra más asteriscos tengo más importante es la cosa
 
-   *** Testeo contra la placa si detecta todo como debe. (*DONE*)
 
-   * Modificar la función statusPortCOM de manera que solo modifique el color (signal to frontend) cuando se detecte que
+    * Modificar la función statusPortCOM de manera que solo modifique el color (signal to frontend) cuando se detecte que
      el puerto serie "desaparecio". Hay que sacar todos los comentarios y esas boludeces más que nada. (*DONE*)
 
-   * Poner una animación de tracking para que se vea en el front que esta haciendo tracking y no se genere algún bardo. (WORKING ON THIS...) (*DONE*)
+    ** Continuación con la parte gráfica, borrar la pestaña de settings y colocar una pestaña de ayuda para generar el 
+        el archivo de texto y color medianamente hacer las cosas para no manquearla.
+    
+    ** Definir como hacer la parte del stop del tracking enviado por la parte gráfica.
 
-   ** Continuación con la parte gráfica, borrar la pestaña de settings y colocar una pestaña de ayuda para generar el
-     el archivo de texto y color medianamente hacer las cosas para no manquearla.
-
+    *** Testar la recepción de datos del MCU y el envió a la PC ante una solicitud de ángulos
 '''
 # ======================================================================================= #
 class VentanaPrincipal(QObject):
@@ -113,13 +113,13 @@ class VentanaPrincipal(QObject):
         self.timertracking.timeout.connect(lambda: self.Control_autonomo())
 
         # Ejecucion de actualizacion grafica grados
-        #self.timer_actual_graf.timeout.connect(lambda: self.Actualizacion_grafica_grados())
+        #self.timer_actual_graf.timeout.connect(lambda: self.Actualizacion_Grafica_Grados())
 
         # Recarga de timer asociados
         self.timerautosave.start(Tiempo_AutoSave)
         self.timercheckports.start(Tiempo_Check_Ports)
         self.timertracking.start(Tiempo_Tracking)
-        #self.timer_actual_graf.start(Tiempo_actualizacion_graf)
+        #self.timer_actual_graf.start(Tiempo_Actualizacion_Graf)
 
     # No es necesario un slot por que no recibimos datos desde UI, ni tampoco una signal dado que no mandamos nada
     # La lógica de esta combinación es necesaria ya que si no puede generarse discrepancia de los datos guardados.
@@ -179,51 +179,29 @@ class VentanaPrincipal(QObject):
     #############################################################################################################
 
     @Slot()
-    def Actualizacion_grafica_grados(self):
-        if ser.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
-            data_str = ser.read(ser.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
-            Flag_recep = True
+    def Actualizacion_Grafica_Grados(self):
 
-        if Flag_recep:
-            dato1 = data_str.split(',')
+        if Serial_PORT.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
+            Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+            Data_Angulos = Data_From_MCU.split(',')
 
-            if dato1[len(dato1)-1] == "\r\n":
-                #caso especial si se desea una sola señal
-                if dato1[0] != 0 and dato1[2] == 0:
-                    data = dato1[1]
-                    #return data
-
-                # caso comun en donde exijo la actualizacion grafica
-                if dato1[2] !=0:
-                    if (dato1[0] == ("A"or"a")) and (dato1[2] == ("E" or "e")) :
-                        Raw_acimut=dato1[1]
-                        #aca va la actualizacion de acimut
-                    #if dato1[2] == ("E" or "e"):
-                        Raw_elevacion=dato1[3]
-                        self.Actual_graf_grados_signal.emit(Raw_acimut,Raw_elevacion)
-                        #aca va la actualizacion de elevacion
-                        #data = Raw_acimut+','+Raw_elevacion
-                        #Tracking(Raw_acimut,Raw_elevacion)
-                        print("llego dato")
-                    #return data
+            if Data_Angulos[len(Data_Angulos)-1] == "\r\n":
+                if (Data_Angulos[0] == ("A" or "a")) and (Data_Angulos[2] == ("E" or "e")):
+                    Raw_acimut = Data_Angulos[1]
+                    Raw_elevacion = Data_Angulos[3]
+                    self.Actual_graf_grados_signal.emit(Raw_acimut,Raw_elevacion)
 
     def Recepcion_datos(self):
-        if ser.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
-            data_str = ser.read(ser.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
-            Flag_recep=True
-#            slice_object1 = slice(3)
-#            slice_object2 = slice(4, 5, 1)
-            informacion = 'a'
+        if Serial_PORT.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
 
-            if data_str == '\r\n':
-                return 'mensaje_correcto'
-                data = 'mensaje correcto'
+            Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
 
-            if data_str == "?>\r\n":
-                return 'mensaje_erroneo'
-                data='mensaje erroneo'
-                comando = b'comando erroneo\n'
-                ser.write(comando)
+            if Data_From_MCU == '\r\n':
+                return 1
+            elif Data_From_MCU == "?>\r\n":
+                return 0
+            else:
+                return -1   # Levantamos verdura (Podríamos usarlo para debugear nosotros y ver que hacer si pasa en un futuro)
 
     #############################################################################################################
     #                                   Fin funciones de puerto serie                                           #
@@ -270,6 +248,7 @@ class VentanaPrincipal(QObject):
                             if(Serial_PORT.is_open == True):
                                 print("* ==== Error ==== * - Se Detecto un Problema en el Puerto " + USB_Port.device + "Cuyo VID:PID es 0x" + list_VID[Index] + ":0x" + list_PID[Index])
                                 self.signal_To_FrontEnd.emit("USB","Problem")
+                                Serial_PORT.close()
                             if(Serial_PORT.is_open == False):
                                 print("* ==== Error ==== * - El Puerto " + USB_Port.device + "no se Encuentra Abierto...")
                                 self.signal_To_FrontEnd.emit("USB","Bad")
@@ -280,7 +259,6 @@ class VentanaPrincipal(QObject):
                 if(Serial_PORT.is_open == True):
                     self.signal_To_FrontEnd.emit("USB","Bad")
                     Serial_PORT.close()
-                    print (Serial_PORT.is_open)
 
     #############################################################################################################
     #                                   Fin funciones de puerto serie                                           #
@@ -297,10 +275,15 @@ class VentanaPrincipal(QObject):
         texto = b'U\r'
         try:
             Serial_PORT.write(texto)
-            self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
             self.commSerieFailed.emit("[Mov. Arriba]: Falla de Envió por Puerto Serie")
-            self.signal_To_FrontEnd.emit("USB","Problem")
+            self.signal_To_FrontEnd.emit("USB","Bad")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Mov. Arriba]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     # D // DOWN Direction Rotation
     @Slot()
@@ -309,10 +292,15 @@ class VentanaPrincipal(QObject):
         texto = b'D\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Mov. Abajo]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Mov. Abajo]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     #R // Clockwise Rotation
     @Slot()
@@ -321,10 +309,15 @@ class VentanaPrincipal(QObject):
         texto = b'R\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Mov. Drcha]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Mov. Drcha]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     #L// Counter Clockwise Rotation
     @Slot()
@@ -333,10 +326,15 @@ class VentanaPrincipal(QObject):
         texto = b'L\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Mov. Izq]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Mov. Izq]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     # A // CW/CCW Rotation Stop
     @Slot()
@@ -345,10 +343,15 @@ class VentanaPrincipal(QObject):
         texto = b'A\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Stop Acimut]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Stop Acimut]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     # E // UP/DOWN Direction Rotation Stop
     @Slot()
@@ -357,10 +360,15 @@ class VentanaPrincipal(QObject):
         texto = b'E\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Stop Elevación]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Stop Elevación]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     # E // UP/DOWN Direction Rotation Stop
     @Slot()
@@ -373,11 +381,16 @@ class VentanaPrincipal(QObject):
         except(serial.SerialException):
            self.commSerieFailed.emit("[Stop Global]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB", "Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Stop Global]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
 
     #############################################################################################################
     #                                         Fin comando manuales                                              #
     #############################################################################################################
-
 
     #############################################################################################################
     #                                   Funciones vinculadas con el tracking                                    #
@@ -396,12 +409,13 @@ class VentanaPrincipal(QObject):
 
        try:
            file = open("comandos4.txt",'r')
-           total_lines = sum(1 for line in file)
-           file.seek(0)
        except:
            print("No Se Encontro el Archivo de Comandos")
            file.close()
            return
+       else:
+           total_lines = sum(1 for line in file)
+           file.seek(0)
 
        linea = file.readline()
        while len(linea) > 0:
@@ -412,12 +426,16 @@ class VentanaPrincipal(QObject):
                   data_elevacion = dato1[3]
                   parametros = "P" + str(float(dato1[2])) + " " + str(float(dato1[3]))
                   Serial_PORT.write(parametros.encode('ascii')+ b'\r')
-                  #print(parametros.encode('ascii')+ b'\r')
-                  self.signal_To_FrontEnd.emit("Tracking","ON")
-                  file.close()
-                  break
-           elif dato1[0] == '': # Fin de archivo detectado
-                   self.signal_To_FrontEnd.emit("Tracking","OFF")
+                  if self.Recepcion_datos() == 1:
+                      self.signal_To_FrontEnd.emit("Tracking", "Good")
+                      file.close()
+                      break
+                  elif self.Recepcion_datos() == 0:
+                      self.signal_To_FrontEnd.emit("Tracking", "Problem")
+                      file.close()
+                      break
+           elif dato1[0] == '':     # Fin de archivo detectado
+                   self.signal_To_FrontEnd.emit("Tracking","Off")
                    file.close()
            linea = file.readline()
     #############################################################################################################
@@ -433,11 +451,15 @@ class VentanaPrincipal(QObject):
         texto = b'B\r'
         try:
            Serial_PORT.write(texto)
-           self.signal_To_FrontEnd.emit("USB","Good")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Act. Posición]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
-
+        else:
+            if(self.Recepcion_datos() == 1):
+                self.signal_To_FrontEnd.emit("USB","Good")
+            elif(self.Recepcion_datos() == 0):
+                self.commSerieFailed.emit("[Act. Posición]: Comando No Renocido")
+                self.signal_To_FrontEnd.emit("USB","Problem")
     #############################################################################################################
     #                                 Fin funciones vinculadas con solicitud de ángulos                         #
     #############################################################################################################

@@ -755,7 +755,7 @@ Page{
                             id: statusTracking
                             width: 50
                             height: 20
-                            color: "#ff0000"
+                            color: "#2f2f2f"
                             radius: 10
                             border.width: 2
                             anchors.left: parent.left
@@ -769,7 +769,7 @@ Page{
                             y: 28
                             width: 50
                             height: 20
-                            color: "#ff0000"
+                            color: "#282828"
                             radius: 30
                             border.width: 2
                             anchors.left: parent.left
@@ -997,36 +997,42 @@ Page{
         }
 
         function onActual_graf_grados_signal(acimut,elevacion){
-            ventanaLog.append(internal.getTime()+ " --- " + "acimut:" + acimut + " ; Elevacion:" + elevacion)
+            ventanaLog.append(internal.getTime()+ " --- " + "Acimut:" + acimut + " ; Elevacion:" + elevacion)
         }
 
         function onSignal_To_FrontEnd(Signal_ID,Signal_Msg){
             if(Signal_ID === "USB"){
                 switch(Signal_Msg){
                     case "Good":
-                        statusCommUSB.color = "#00ff00"
+                        statusCommUSB.color = "#00ff00"    // Verde
                         break;
                     case "Bad":
-                        statusCommUSB.color = "#ff0000"
+                        statusCommUSB.color = "#ff0000"    // Rojo
                         break;
                     case "Problem":
-                        statusCommUSB.color = "#fff700"
+                        statusCommUSB.color = "#fff700"    // Amarillo
                         break;
                     default:
-                        statusCommUSB.color = "#fff700"
+                        statusCommUSB.color = "#2f2f2f"     // Gris
                         break;
                 }
             }
             else if(Signal_ID === "Tracking"){
                 switch(Signal_Msg){
-                    case "ON":
-                        statusTracking.color = "#00ff00"
+                    case "Good":
+                        statusTracking.color = "#00ff00"    // Verde
                         break;
-                    case "OFF":
-                        statusTracking.color = "#ff0000"
+                    case "Stoped":
+                        statusTracking.color = "#fff700"    // Amarillo
+                        break;
+                    case "Off":
+                        statusTracking.color = "#2f2f2f"     // Gris
+                        break;
+                    case "Problem":
+                        statusTracking.color = "#ff0000"    // Rojo
                         break;
                     default:
-                        statusTracking.color = "#fff700"
+                        statusTracking.color = "#2f2f2f"     // Gris
                         break;
                 }
             }
@@ -1037,6 +1043,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.75;height:608;width:1218}
+    D{i:0;formeditorZoom:0.9;height:608;width:1218}
 }
 ##^##*/
