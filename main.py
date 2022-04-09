@@ -35,16 +35,16 @@ DEFAULT_URL_LOG = "file:///C:/Users/"+Name_User+"/Desktop/Ground_Station_Log.txt
 Tiempo_AutoSave = 60000
 
 # ---------- Timer de chequeo de puerto serie cada 15 seg --------------
-Tiempo_Check_Ports = 15000
+Tiempo_Check_Ports = 10000
 
 # ---------- Timer de chequeo de tracking cada 60 seg --------------
 Tiempo_Tracking = 60000
 
-# ---------- Timer de actualizacion de graficos cada 30 seg --------------
-#Tiempo_Actualizacion_Graf = 30000
+# ---------- Timer de actualizacion de graficos cada 5 seg --------------
+Tiempo_Actualizacion_Graf = 5000
 
 # ---------- Conexión con el puerto serie --------------
-#Serial_PORT = serial.Serial()
+Serial_PORT = serial.Serial()
 Flag_recep = False
 data_acimut = -99       # Valor no valido
 data_elevacion = -99    # Valor no valido
@@ -88,7 +88,7 @@ class VentanaPrincipal(QObject):
     commSerieFailed = Signal(str)
 
     # Señal de actualizacion de los grados graficos
-    #Actual_graf_grados_signal = Signal(str,str)
+    actual_graf_grados_signal = Signal(float,float)
 
     # Señal simple (envió de string) hacia la parte gráfica de la aplicación
     signal_To_FrontEnd = Signal(str, str)
@@ -101,7 +101,7 @@ class VentanaPrincipal(QObject):
         self.timerautosave = QTimer()
         self.timercheckports = QTimer()
         self.timertracking = QTimer()
-        #self.timer_actual_graf = QTimer()
+        self.timer_actual_graf = QTimer()
 
         # Ejecución de Actualizar_Interface cada vez que desborde el timer
         self.timerautosave.timeout.connect(lambda: self.autoGuardadoLog())
@@ -113,13 +113,13 @@ class VentanaPrincipal(QObject):
         self.timertracking.timeout.connect(lambda: self.Control_autonomo())
 
         # Ejecucion de actualizacion grafica grados
-        #self.timer_actual_graf.timeout.connect(lambda: self.Actualizacion_Grafica_Grados())
+        self.timer_actual_graf.timeout.connect(lambda: self.Actualizacion_Posicion())
 
         # Recarga de timer asociados
         self.timerautosave.start(Tiempo_AutoSave)
         self.timercheckports.start(Tiempo_Check_Ports)
         self.timertracking.start(Tiempo_Tracking)
-        #self.timer_actual_graf.start(Tiempo_Actualizacion_Graf)
+        self.timer_actual_graf.start(Tiempo_Actualizacion_Graf)
 
     # No es necesario un slot por que no recibimos datos desde UI, ni tampoco una signal dado que no mandamos nada
     # La lógica de esta combinación es necesaria ya que si no puede generarse discrepancia de los datos guardados.
@@ -183,18 +183,23 @@ class VentanaPrincipal(QObject):
 
         if Serial_PORT.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
             Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+            #Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting())
             Data_Angulos = Data_From_MCU.split(',')
-
-            if Data_Angulos[len(Data_Angulos)-1] == "\r\n":
-                if (Data_Angulos[0] == ("A" or "a")) and (Data_Angulos[2] == ("E" or "e")):
-                    Raw_acimut = Data_Angulos[1]
-                    Raw_elevacion = Data_Angulos[3]
-                    self.Actual_graf_grados_signal.emit(Raw_acimut,Raw_elevacion)
+            if (Data_Angulos[0] == "A" and Data_Angulos[2] == "E"):
+                print("ENTRE LA PUTA MADRE")
+                Raw_acimut = Data_Angulos[1]
+                Raw_elevacion = Data_Angulos[3]
+                self.actual_graf_grados_signal.emit(float(Raw_acimut),float(Raw_elevacion))
+                return 1
+            else:
+                return 0
 
     def Recepcion_datos(self):
+
         if Serial_PORT.in_waiting > 0:  # if incoming bytes are waiting to be read from the serial input buffer
 
-            Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+            #Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+            Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting())
 
             if Data_From_MCU == '\r\n':
                 return 1
@@ -256,9 +261,6 @@ class VentanaPrincipal(QObject):
                 print('\n* =================================== Notificación =================================== *')
                 print("\t No se Encontro Ningún Dispositivo Cuyo par VID:PID sea 0x" + list_VID[Index] + ':0x' + list_PID[Index])
                 print('* =================================================================================== *')
-                if(Serial_PORT.is_open == True):
-                    self.signal_To_FrontEnd.emit("USB","Bad")
-                    Serial_PORT.close()
 
     #############################################################################################################
     #                                   Fin funciones de puerto serie                                           #
@@ -451,13 +453,14 @@ class VentanaPrincipal(QObject):
         texto = b'B\r'
         try:
            Serial_PORT.write(texto)
+           print("Mande una B")
         except(serial.SerialException):
            self.commSerieFailed.emit("[Act. Posición]: Falla de Envió por Puerto Serie")
            self.signal_To_FrontEnd.emit("USB","Problem")
         else:
-            if(self.Recepcion_datos() == 1):
+            if(self.Actualizacion_Grafica_Grados() == 1):
                 self.signal_To_FrontEnd.emit("USB","Good")
-            elif(self.Recepcion_datos() == 0):
+            elif(self.Actualizacion_Grafica_Grados() == 0):
                 self.commSerieFailed.emit("[Act. Posición]: Comando No Renocido")
                 self.signal_To_FrontEnd.emit("USB","Problem")
     #############################################################################################################

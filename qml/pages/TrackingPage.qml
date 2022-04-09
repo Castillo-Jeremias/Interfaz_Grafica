@@ -842,13 +842,13 @@ Page{
                         anchors.topMargin: 40
 
                         //Máximo valor y minímo de la escala a representar
-                        maximumValue: 90
-                        minimumValue: -90
+                        maximumValue: 180
+                        minimumValue: 0
 
                         //Minímo offset de valor para mover la aguja del gauge
                         stepSize: 0.1
 
-                        value: 0
+                        value: 90
                         style: CircularGaugeStyle{
                             //tickmarkLabel: null     // Label que viene por defecto OFF
                             minimumValueAngle: -90
@@ -998,6 +998,8 @@ Page{
 
         function onActual_graf_grados_signal(acimut,elevacion){
             ventanaLog.append(internal.getTime()+ " --- " + "Acimut:" + acimut + " ; Elevacion:" + elevacion)
+            gaugeAcimut.value = acimut
+            gaugeElevacion.value = elevacion
         }
 
         function onSignal_To_FrontEnd(Signal_ID,Signal_Msg){
