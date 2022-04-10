@@ -993,12 +993,16 @@ Page{
         }
 
         function onCommSerieFailed(msgError){
-            ventanaLog.append(internal.getTime()+ " --- " + msgError)
+            // Caso en el cual estamos trabajando y se detecta un problema con el USB
+            if(statusCommUSB.color == "#00ff00"){
+                ventanaLog.append(internal.getTime()+ " --- " + msgError)
+            }
         }
 
         function onActual_graf_grados_signal(acimut,elevacion){
-            ventanaLog.append(internal.getTime()+ " --- " + "Acimut:" + acimut + " ; Elevacion:" + elevacion)
+            // Actualización del gauge de acimut
             gaugeAcimut.value = acimut
+            // Actualización del gauge de elevación
             gaugeElevacion.value = elevacion
         }
 
