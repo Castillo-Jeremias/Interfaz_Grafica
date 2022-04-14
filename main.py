@@ -39,8 +39,7 @@ HOUR   = 60 * MINUTE    # Hora en milisegundos.
 Tiempo_AutoSave = 1 * MINUTE
 
 # ---------- Timer de chequeo de puerto serie cada 15 seg --------------
-# En un principio se utiliza un timer de 3 seg, una vez que intente buscar el puerto se modifica el tiempo a 15
-Tiempo_Check_Ports = 3 * SECOND
+Tiempo_Check_Ports = 5 * SECOND
 
 # ---------- Timer de chequeo de tracking cada 60 seg --------------
 Tiempo_Tracking = 1 * MINUTE
@@ -180,19 +179,58 @@ class VentanaPrincipal(QObject):
     #############################################################################################################
     #                                    Actualizacion grafica de los grados                                   #
     #############################################################################################################
+    # ======= WORKINK ON THIS
+    # Caso crítico
+    # Buffer: \r\n\r\nA, 135.01, E, 0.5\r\n
+    # Msg:     1  |         2          | 3
+    # Salida del split \r\n: ['', '', 'A, 135.01, E, 0.5', '']
+    #
+    # =======
 
-    @Slot()
+    #@Slot()
+    # def Actualizar_Grafica(self):
+    #     if Serial_PORT.in_waiting > 0:
+    #         Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+    #         Data_Command = Data_From_MCU.split(',')
+    #         if Data_Command[0] == "A" and Data_Command[2] == "E":
+    #             Raw_acimut = Data_Command[1]
+    #             Raw_elevacion = Data_Command[3]
+    #             self.actual_graf_grados_signal.emit(float(Raw_acimut),float(Raw_elevacion))
+    #             return 1
+    #         else:
+    #             return 0
+
     def Actualizar_Grafica(self):
         if Serial_PORT.in_waiting > 0:
-            Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
-            Data_Command = Data_From_MCU.split(',')
-            if Data_Command[0] == "A" and Data_Command[2] == "E":
-                Raw_acimut = Data_Command[1]
-                Raw_elevacion = Data_Command[3]
-                self.actual_graf_grados_signal.emit(float(Raw_acimut),float(Raw_elevacion))
-                return 1
+            Cant_Msg = Serial_PORT.in_waiting
+            Data_From_MCU_Raw = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
+            Data_From_MCU = Data_From_MCU_Raw.split('\r\n')
+            if(Data_From_MCU > 2):  # Caso de encolamiento de comandos
+                for Index_Msg in range(Cant_Msg):
+                    if Data_From_MCU[Index_Msg] == '' and Data_From_MCU[Index_Msg+1] != '':
+                        Data_Command = Data_From_MCU[Index_Msg+1].split(',')
+                        if Data_Command[0] == "A" and Data_Command[2] == "E":
+                            Raw_acimut = Data_Command[1]
+                            Raw_elevacion = Data_Command[3]
+                            self.actual_graf_grados_signal.emit(float(Raw_acimut), float(Raw_elevacion))
+                            return 1
+                        else:
+                            return 0
+                    else:
+                        pass
+                        # Recepcion de un comando correcto (MANUAL)
+                print("[Actualizar_Grafica]: ADVERTENCIA. Se encolaron datos")       
             else:
-                return 0
+                if Data_From_MCU[0] == '' and Data_From_MCU[1] != '':
+                    Command = Data_From_MCU[1]
+                    Data_Command = Command.split(',')
+                    if Data_Command[0] == "A" and Data_Command[2] == "E":
+                        Raw_acimut = Data_Command[1]
+                        Raw_elevacion = Data_Command[3]
+                        self.actual_graf_grados_signal.emit(float(Raw_acimut), float(Raw_elevacion))
+                        return 1
+                    else:
+                        return 0
 
     def Datos_Recibidos(self):
         if Serial_PORT.in_waiting > 0:
@@ -241,7 +279,6 @@ class VentanaPrincipal(QObject):
                             Serial_PORT.open()
                             self.timertracking.start(Tiempo_Tracking)
                             self.timer_actual_graf.start(Tiempo_Actualizacion_Graf)
-                            Tiempo_Check_Ports = 15 * SECOND
                     except serial.SerialException:
                         if Serial_PORT.is_open == True:
                             print("[statusPortCOM]: Se Detecto un Problema en el Puerto " + USB_Port.device + " Cuyo VID:PID es 0x" + list_VID[Index] + ":0x" + list_PID[Index])
@@ -409,7 +446,6 @@ class VentanaPrincipal(QObject):
            file = open("comandos4.txt", 'r')
        except:
            print("No Se Encontro el Archivo de Comandos")
-           file.close()
            return
        else:
            total_lines = sum(1 for line in file)
