@@ -10,6 +10,10 @@ import "../controls"
 import QtQuick.Extras 1.4
 
 Page{
+    property string verde: "#00ff00"
+    property string gris: "#282828"
+    property string amarillo: "#fff700"
+    property string rojo: "#ff0000"
 
     /*Ingreso de comandos manuales por teclado*/
     Keys.onPressed:{
@@ -994,7 +998,7 @@ Page{
 
         function onCommSerieFailed(msgError){
             // Caso en el cual estamos trabajando y se detecta un problema con el USB
-            if(statusCommUSB.color == "#00ff00"){
+            if(statusCommUSB.color == "#00ff00" || statusCommUSB.color == "#282828" ){
                 ventanaLog.append(internal.getTime()+ " --- " + msgError)
             }
         }
@@ -1010,35 +1014,35 @@ Page{
             if(Signal_ID === "USB"){
                 switch(Signal_Msg){
                     case "Good":
-                        statusCommUSB.color = "#00ff00"    // Verde
+                        statusCommUSB.color = verde
                         break;
                     case "Bad":
-                        statusCommUSB.color = "#ff0000"    // Rojo
+                        statusCommUSB.color = rojo
                         break;
                     case "Problem":
-                        statusCommUSB.color = "#fff700"    // Amarillo
+                        statusCommUSB.color = amarillo
                         break;
                     default:
-                        statusCommUSB.color = "#2f2f2f"     // Gris
+                        statusCommUSB.color = gris
                         break;
                 }
             }
             else if(Signal_ID === "Tracking"){
                 switch(Signal_Msg){
                     case "Good":
-                        statusTracking.color = "#00ff00"    // Verde
+                        statusTracking.color = verde    // Verde
                         break;
                     case "Stoped":
-                        statusTracking.color = "#fff700"    // Amarillo
+                        statusTracking.color = amarillo    // Amarillo
                         break;
                     case "Off":
-                        statusTracking.color = "#2f2f2f"     // Gris
+                        statusTracking.color = gris    // Gris
                         break;
                     case "Problem":
-                        statusTracking.color = "#ff0000"    // Rojo
+                        statusTracking.color = rojo    // Rojo
                         break;
                     default:
-                        statusTracking.color = "#2f2f2f"     // Gris
+                        statusTracking.color = gris     // Gris
                         break;
                 }
             }
