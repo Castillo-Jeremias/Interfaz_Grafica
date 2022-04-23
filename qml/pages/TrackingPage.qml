@@ -807,6 +807,62 @@ Page{
                             anchors.bottomMargin: 3
                             minimumPixelSize: 12
                         }
+
+                        Rectangle {
+                            id: statusCommRX
+                            y: 27
+                            width: 50
+                            height: 20
+                            color: "#282828"
+                            radius: 30
+                            border.width: 2
+                            anchors.left: parent.left
+                            anchors.bottom: parent.bottom
+                            anchors.leftMargin: 249
+                            anchors.bottomMargin: 3
+                        }
+
+                        Text {
+                            id: statePortRX_Text
+                            x: 315
+                            y: 27
+                            height: 20
+                            text: "USB - Recepción"
+                            anchors.bottom: parent.bottom
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            minimumPixelSize: 12
+                            anchors.bottomMargin: 3
+                        }
+
+                        Rectangle {
+                            id: statusCommTX
+                            y: 3
+                            width: 50
+                            height: 20
+                            color: "#282828"
+                            radius: 30
+                            border.width: 2
+                            anchors.left: parent.left
+                            anchors.bottom: parent.bottom
+                            anchors.leftMargin: 249
+                            anchors.bottomMargin: 27
+                        }
+
+                        Text {
+                            id: statePortTX_Text
+                            x: 315
+                            y: 3
+                            height: 20
+                            text: "USB - Transmición"
+                            anchors.bottom: parent.bottom
+                            font.pixelSize: 12
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            minimumPixelSize: 12
+                            anchors.bottomMargin: 27
+                        }
                     }
 
                 }
@@ -996,10 +1052,10 @@ Page{
             ventanaLog.clear()
         }
 
-        function onCommSerieFailed(msgError){
+        function onCommBack_Front(msg){
             // Caso en el cual estamos trabajando y se detecta un problema con el USB
             if(statusCommUSB.color == verde || statusCommUSB.color == gris ){
-                ventanaLog.append(internal.getTime()+ " --- " + msgError)
+                ventanaLog.append(internal.getTime()+ " --- " + msg)
             }
         }
 
@@ -1046,6 +1102,39 @@ Page{
                         break;
                 }
             }
+            else if(Signal_ID === "USB - RX"){
+                switch(Signal_Msg){
+                    case "Good":
+                        statusCommRX.color = verde
+                        break;
+                    case "Bad":
+                        statusCommRX.color = rojo
+                        break;
+                    case "Problem":
+                        statusCommRX.color = amarillo
+                        break;
+                    default:
+                        statusCommRX.color = gris
+                        break;
+                }
+
+            }
+            else if(Signal_ID === "USB - TX"){
+                switch(Signal_Msg){
+                    case "Good":
+                        statusCommTX.color = verde
+                        break;
+                    case "Bad":
+                        statusCommTX.color = rojo
+                        break;
+                    case "Problem":
+                        statusCommTX.color = amarillo
+                        break;
+                    default:
+                        statusCommTX.color = gris
+                        break;
+                }
+            }
         }
 
     }
@@ -1053,6 +1142,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.9;height:608;width:1218}
+    D{i:0;formeditorZoom:1.25;height:608;width:1218}
 }
 ##^##*/
