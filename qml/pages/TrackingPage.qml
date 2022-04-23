@@ -998,7 +998,7 @@ Page{
 
         function onCommSerieFailed(msgError){
             // Caso en el cual estamos trabajando y se detecta un problema con el USB
-            if(statusCommUSB.color == "#00ff00" || statusCommUSB.color == "#282828" ){
+            if(statusCommUSB.color == verde || statusCommUSB.color == gris ){
                 ventanaLog.append(internal.getTime()+ " --- " + msgError)
             }
         }
