@@ -5,7 +5,7 @@
 #############################################################################################################
 #                                                Imports                                                    #
 #############################################################################################################
-# Modulo que permite la incorporación de timers.
+# Modulo que permite funciones relacionados con tiempo
 import time
 
 # Modulo que incorpora utilidades para comunicación serie.
@@ -44,7 +44,7 @@ Name_User = getpass.getuser()
 DEFAULT_URL_LOG = "file:///C:/Users/"+Name_User+"/Desktop/Ground_Station_Log.txt"
 
 # Número máximo de caracteres a recibir ante un pedido de posición
-MAX_SIZE_COMMAND_ANGLE = 18
+MAX_SIZE_COMMAND_ANGLE = 19
 
 # Número máximo de caracteres a recibir en respuesta afirmativa o negativa
 MAX_SIZE_COMMAND_RESP = 4
@@ -74,13 +74,13 @@ Tiempo_Tracking = 1 * MINUTE
 Tiempo_Actualizacion_Graf = 30 * SECOND
 
 Dict_Text_Commands = {
-    'U' : '[Mov. Arriba]',
-    'D' : '[Mov. Abajo]',
-    'L' : '[Mov. Izq]',
-    'R' : '[Mov. Drcha]',
-    'A' : '[Stop Acimut]',
-    'E' : '[Stop Elevación]',
-    'S' : '[Stop Global]'
+    'U' : '[moveUp()]',
+    'D' : '[moveDown()]',
+    'L' : '[moveToLeft()]',
+    'R' : '[moveToRight()]',
+    'A' : '[stopAcimut()]',
+    'E' : '[stopElevacion()]',
+    'S' : '[stopEverthing()]'
 }
 
 # Conexión con el puerto serie
@@ -98,7 +98,7 @@ Serial_PORT = serial.Serial()
     
     ** Definir como hacer la parte del stop del tracking enviado por la parte gráfica.
 
-    *** Testar la recepción de datos del MCU y el envió a la PC ante una solicitud de ángulos con la nueva implementación
+    *** Testar la recepción de datos del MCU y el envió a la PC ante una solicitud de ángulos con la nueva implementación (** DONE **)
 '''
 # ======================================================================================= #
 
@@ -119,9 +119,6 @@ class VentanaPrincipal(QObject):
 
     # Señal enviada a la UI para notificar que los datos fueron guardados y puede borrar lo que tenga el LOG
     cleanLogAvalible = Signal()
-
-    # Señal donde se envia el puerto serie a la UI
-    setPortCOM = Signal(str)
 
     #Señal de error de envio por puerto serie
     commSerieFailed = Signal(str)
@@ -218,86 +215,72 @@ class VentanaPrincipal(QObject):
         self.cleanLogAvalible.emit()
 
     #############################################################################################################
-    #                                    Actualizacion grafica de los grados                                   #
+    #                                    Actualizacion grafica de los grados                                    #
     #############################################################################################################
-    # ======= WORKINK ON THIS
+
+    # ========================= WORKINK ON THIS =========================
     # Caso crítico
     # Buffer: \r\nA,135.01,E,150.5\r\n?>\r\n
     # Máx Command single: A,135.01,E,150.5\r\n
     # Msg:     1  |         2          | 3
     # Salida del split \r\n: ['', '', 'A, 135.01, E, 0.5', '']
     #
-    # =======
-
-        #@Slot()
-        # def Actualizar_Grafica(self):
-        #     if Serial_PORT.in_waiting > 0:
-        #         Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
-        #         Data_Command = Data_From_MCU.split(',')
-        #         if Data_Command[0] == "A" and Data_Command[2] == "E":
-        #             Raw_acimut = Data_Command[1]
-        #             Raw_elevacion = Data_Command[3]
-        #             self.actual_graf_grados_signal.emit(float(Raw_acimut),float(Raw_elevacion))
-        #             return 1
-        #         else:
-        #             return 0
-
-        # def Recepcion_Datos(self):
-        #     if Serial_PORT.in_waiting > 0:
-        #         Data_From_MCU = Serial_PORT.read(Serial_PORT.inWaiting()).decode('ascii')  # read the bytes and convert from binary array to ASCII
-        #         if Data_From_MCU == '\r\n':
-        #             return 1
-        #         elif Data_From_MCU == "?>\r\n":
-        #             return 0
-        #         else:
-        #             return -1   # Levantamos verdura (Podríamos usarlo para debugear nosotros y ver que hacer si pasa en un futuro)
+    # ====================================================================
 
     def Recepcion_Datos(self):
         try:
-            Data_From_MCU = Serial_PORT.read_until(END_COMMAND).decode('ascii')
-            Serial_PORT.reset_input_buffer()
+            if(Serial_PORT.is_open == True):
+                # Leemos hasta encontrar un END_COMMAND = "\r\n". Si leemos hasta un END_COMMAND trabajamos siempre con un comando a la vez y nos sacamos el bardo del encolamiento
+                Data_From_MCU = Serial_PORT.read_until(END_COMMAND).decode('ascii')
+                # Una vez detectado 1 comando limpiamos el buffer (OPCIONAL)
+                #Serial_PORT.reset_input_buffer()
         except serial.SerialException:
-            self.commSerieFailed.emit("[Recepcion_Datos]: No Existe Conexión con el Dispositivo")
-            self.signal_To_FrontEnd.emit("USB", "Problem")
+            self.commSerieFailed.emit("[Recepcion_Datos()]: No Existe Conexión con el Dispositivo")
+            self.signal_To_FrontEnd.emit("USB - RX", "Problem")
             return -1 # Error
         else:
+            self.signal_To_FrontEnd.emit("USB - RX", "Good")
             if(len(Data_From_MCU) >= 2 and len(Data_From_MCU) <= 4):
+                # ======================= FOR DEBUGGING =======================#
                 print("Número de caracteres en puerto serie Man: " + str(len(Data_From_MCU)))
                 print("Lectura de puerto serie Manual: " + Data_From_MCU)
-                # Leemos hasta encontrar un END_COMMAND(\r\n) o un máximo de 4 caracteres o hasta que salte el timeout de lectura
+                # ======================= FOR DEBUGGING =======================#
                 if Data_From_MCU == '\r\n':
-                    return 1
+                    return 1    #Recepción de comando OK
                 elif Data_From_MCU == '?>\r\n':
-                    return 0
+                    return 0    #Recepción de comando NOT OK
                 else:
                     return -1 # Error
             else:
-                # Leemos hasta encontrar un END_COMMAND(\r\n) o un máximo de 18 caracteres o hasta que salte el timeout de lectura
-                # Si leemos hasta un END_COMMAND trabajamos siempre con un comando a la vez y nos sacamos el bardo del encolamiento
+                # ======================= FOR DEBUGGING =======================#
                 print("Número de caracteres en puerto serie Ángulos: " + str(len(Data_From_MCU)))
                 print("Lectura de puerto serie Ángulos: " + Data_From_MCU)
+                # ======================= FOR DEBUGGING =======================#
+
                 Data_Split = Data_From_MCU.split('\r\n')
                 # Una vez realizado el split tenemos la información de la siguiente manera:
                     #   Data_Split = ['A,135.01,E,150.05', '']
                     #   Index list   |        0         | 1 |
                     #                |  Data Command    |End|
+
                 Data_Command = Data_Split[0].split(',')
                 # Data_Command = ['A', '135.01', 'E', '150.05', '']
                 # Index list     | 0 |    1    |  2 |    3    | 4 |
+
                 if Data_Command[0] == "A" and Data_Command[2] == "E":
                     Raw_acimut = Data_Command[1]
                     Raw_elevacion = Data_Command[3]
                     self.actual_graf_grados_signal.emit(float(Raw_acimut), float(Raw_elevacion))
-                    return 1
+                    return 1    #Recepción de comando OK
                 else:
-                    return 0
+                    return 0    #Recepción de comando NOT OK
 
     #############################################################################################################
     #                                       Fin funciones de puerto serie                                       #
     #############################################################################################################
 
     #############################################################################################################
-    #                                           Funciones de puerto serie                                       #
+    #                                         Funciones de puerto serie                                         #
     #############################################################################################################
 
     # Descripción:
@@ -335,27 +318,30 @@ class VentanaPrincipal(QObject):
                             Serial_PORT.timeout = 0.05   # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 S, estamos holgados
                     except serial.SerialException:
                         if Serial_PORT.is_open == True:
-                            self.commSerieFailed.emit("[statusPortCOM]: Ha Ocurrido un Problema con el Puerto: " + USB_Port.device)
+                            self.commSerieFailed.emit("[statusPortCOM()]: Problema con la Instancia del Puerto " + USB_Port.device)
                             self.signal_To_FrontEnd.emit("USB", "Problem")
-                            Serial_PORT.close()
-                        if Serial_PORT.is_open == False:
-                            self.commSerieFailed.emit("[statusPortCOM]: No se ha Podido Conectar con el Puerto: " + USB_Port.device)
+                            Serial_PORT.close()     # We gonna retry later . . .
+                        elif Serial_PORT.is_open == False:
+                            self.commSerieFailed.emit("[statusPortCOM()]: Desconexión Forzada del Puerto " + USB_Port.device)
                             self.signal_To_FrontEnd.emit("USB", "Bad")
+                            Serial_PORT.close()  # Just in case . . .
                     else:
                         if(Serial_PORT.is_open == False):
                             try:
-                                self.commSerieFailed.emit("[statusPortCOM]: Intentando Conectar con " + USB_Port.device + "...")
+                                self.commSerieFailed.emit("[statusPortCOM()]: Intentando Conectar con " + USB_Port.device + "...")
                                 Serial_PORT.open()
                             except:
-                                self.commSerieFailed.emit("[statusPortCOM]: ¡Falla al abrir el puerto " + USB_Port.device + "!")
+                                self.commSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
                                 self.signal_To_FrontEnd.emit("USB", "Bad")
                             else:
-                                self.commSerieFailed.emit("[statusPortCOM]: ¡Conectado al " + USB_Port.device + "!")
+                                self.commSerieFailed.emit("[statusPortCOM()]: ¡¡Conectado al " + USB_Port.device + "!!")
                                 self.signal_To_FrontEnd.emit("USB", "Good")
+                        else: # Serial_PORT.is_open == True. Estado OK
+                            self.signal_To_FrontEnd.emit("USB", "Good")
             else:
-                self.commSerieFailed.emit("[statusPortCOM]: Dispositivo No Encontrado")
+                self.commSerieFailed.emit("[statusPortCOM()]: Dispositivo No Encontrado")
                 self.signal_To_FrontEnd.emit("USB", "Problem")
-        time.sleep(0.05)  # Sleep de Seguridad de 50 mS
+        time.sleep(0.05)  # Next check in 50 mSeg (Sleep de seguridad)
 
     #############################################################################################################
     #                                   Fin funciones de puerto serie                                           #
@@ -476,25 +462,29 @@ class VentanaPrincipal(QObject):
     #   Ejecución períodica de la misma cada 60 segundos ante el desborde o overflow del timer de actualización gráfica.
     #   Esta es la que posee mayor prioridad de envió por puerto serie, si el timer esta en 0 (overflow), hasta no terminar
     #   la ejecución de esta función no se procedera con cualquier otro envió de puerto serie.
-
     def Actualizar_Posicion(self):
         #comando a enviar: "B\r"
         cmd = 'B\r'
         try:
             if(Serial_PORT.is_open):
                 Serial_PORT.write(cmd.encode('utf-8'))
+                self.signal_To_FrontEnd.emit("USB - TX", "Good")
             else:
-                self.commSerieFailed.emit("[Act. Posición]: Falla de Envió por Puerto Serie")
-                self.signal_To_FrontEnd.emit("USB", "Problem")
-        except serial.SerialException :
-           self.commSerieFailed.emit("[Act. Posición]: Falla de Envió por Puerto Serie")
-           self.signal_To_FrontEnd.emit("USB", "Problem")
+                self.commSerieFailed.emit("[Actualizar_Posicion()]: El puerto Serie no se Encuentra Abierto")
+                self.signal_To_FrontEnd.emit("USB - TX", "Problem")
+        except serial.SerialException:
+           self.commSerieFailed.emit("[Actualizar_Posicion()]: Falla de Envió por Puerto Serie")
+           self.signal_To_FrontEnd.emit("USB - TX", "Bad")
         else:
             if self.Recepcion_Datos() == 1:
-                self.signal_To_FrontEnd.emit("USB", "Good")
+                self.commSerieFailed.emit("[Actualizar_Posicion()]: Comando Reconocido")
+                self.signal_To_FrontEnd.emit("USB - RX", "Good")
             elif self.Recepcion_Datos() == 0:
-                self.commSerieFailed.emit("[Act. Posición]: Comando No Renocido")
-                self.signal_To_FrontEnd.emit("USB", "Problem")
+                self.commSerieFailed.emit("[Actualizar_Posicion()]: Comando No Reconocido")
+                self.signal_To_FrontEnd.emit("USB - RX", "Problem")
+            else:
+                self.commSerieFailed.emit("[Actualizar_Posicion()]: Recepción Erronea")
+                self.signal_To_FrontEnd.emit("USB - RX", "Bad")
 
     # Descripción:
     #
@@ -507,32 +497,31 @@ class VentanaPrincipal(QObject):
     #   Letra_Cmd: ID o Comando a enviar al dispositivo
     #   timer_actual_graf.remainingTime():  Tiempo restante antes del overflow del timer de actualización gráfica
     #   Dict_Text_Commands[Letra_Cmd]: Texto Asociado al Comando a Ser enviado a la APP.
-
     def Enviar_Comando(self,Command):
         Letra_Cmd = Command[0:1]
-        #print(Letra_Cmd)
-        try:
-            while (self.timer_actual_graf.remainingTime() == 0):    # Cuidado si se modifica o elimina timer_actual_graf (QTimer)
-                time.sleep(0.01)  # Sleep de 10 mS
-            else:
-                try:
-                    if(Serial_PORT.is_open):
-                        Serial_PORT.write(Command.encode('utf-8'))
-                    else:
-                        self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd] + " :El puerto Serie no se Encuentra Abierto")
-                        self.signal_To_FrontEnd.emit("USB", "Problem")
-                except serial.PortNotOpenError:
-                    self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd]  + " :El puerto Serie no se Encuentra Abierto")
-                    self.signal_To_FrontEnd.emit("USB", "Problem")
-        except serial.SerialException:
-           self.commSerieFailed.emit("[Enviar_Comando]:" + ": Falla de Envió por Puerto Serie")
-           self.signal_To_FrontEnd.emit("USB", "Problem")
+        while (self.timer_actual_graf.remainingTime() == 0):    # Cuidado si se modifica o elimina timer_actual_graf (QTimer)
+            time.sleep(0.01)  # Sleep de 10 mS
         else:
-            if self.Recepcion_Datos() == 1:
-                self.signal_To_FrontEnd.emit("USB", "Good")
-            elif self.Recepcion_Datos() == 0:
-                self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd]   + " :Comando No Reconocido")
-                self.signal_To_FrontEnd.emit("USB", "Problem")
+            try:
+                if(Serial_PORT.is_open == True):
+                    Serial_PORT.write(Command.encode('utf-8'))
+                    self.signal_To_FrontEnd.emit("USB - TX", "Good")
+                else:
+                    self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd] + ": El puerto Serie no se Encuentra Abierto")
+                    self.signal_To_FrontEnd.emit("USB - TX", "Problem")
+            except serial.PortNotOpenError:
+                self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd]  + ": Falla de Envió por Puerto Serie")
+                self.signal_To_FrontEnd.emit("USB - TX", "Bad")
+            else:
+                if self.Recepcion_Datos() == 1:
+                    self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd] + ": Comando Reconocido")
+                    self.signal_To_FrontEnd.emit("USB - RX", "Good")
+                elif self.Recepcion_Datos() == 0:
+                    self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd] + ": Comando No Reconocido")
+                    self.signal_To_FrontEnd.emit("USB - RX", "Problem")
+                else:
+                    self.commSerieFailed.emit(Dict_Text_Commands[Letra_Cmd] + ": Recepción Erronea")
+                    self.signal_To_FrontEnd.emit("USB - RX", "Bad")
 
     #############################################################################################################
     #                                 Fin funciones vinculadas con solicitud de ángulos                         #
