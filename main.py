@@ -329,8 +329,8 @@ class VentanaPrincipal(QObject):
                 for USB_Port in Device_To_Found:
                     try:
                         if Serial_PORT.is_open == False:
-                            #Serial_PORT.port = USB_Port.device
-                            Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
+                            Serial_PORT.port = USB_Port.device
+                            #Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
                             Serial_PORT.baudrate = 9600
                             Serial_PORT.timeout = 0.05   # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 S, estamos holgados
                     except serial.SerialException:
