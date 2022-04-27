@@ -403,7 +403,6 @@ Page{
                             backendPython.stopElevacion()
                             internal.disableBusyIndicators()
                             internal.showNothingdataTxt()
-                            ventanaLog.append( internal.getTime() +" --- Deteniendo elevación")
                         }
 
                         onPressAndHold: {
@@ -411,9 +410,6 @@ Page{
                         }
 
                         onPressed:{
-                           if(!btnArriba.pressAndHold()){
-                                ventanaLog.append( internal.getTime() +" --- Movimiento hacia arriba")
-                            }
                             internal.sendCommandToBackend(btnArriba)
                         }
 
@@ -434,13 +430,9 @@ Page{
                             backendPython.stopAcimut()
                             internal.disableBusyIndicators()
                             internal.showNothingdataTxt()
-                            ventanaLog.append( internal.getTime() + " --- Deteniendo acimut")
                         }
 
                         onPressed:{
-                            if(!btnIzquierda.pressAndHold()){
-                                ventanaLog.append( internal.getTime() + " --- Movimiento hacia la izquierda")
-                            }
                             internal.sendCommandToBackend(btnIzquierda)
                         }
                     }
@@ -454,13 +446,9 @@ Page{
                             backendPython.stopElevacion()
                             internal.disableBusyIndicators()
                             internal.showNothingdataTxt()
-                            ventanaLog.append( internal.getTime() + " --- Deteniendo elevación")
                         }
 
                         onPressed:{
-                            if(!btnAbajo.pressAndHold()){
-                                ventanaLog.append( internal.getTime() + " --- Movimiento hacia abajo")
-                            }
                             internal.sendCommandToBackend(btnAbajo)
                         }
                     }
@@ -475,12 +463,8 @@ Page{
                             backendPython.stopAcimut()
                             internal.disableBusyIndicators()
                             internal.showNothingdataTxt()
-                            ventanaLog.append( internal.getTime() + " --- Deteniendo acimut")
                         }
                         onPressed:{
-                            if(!btnDerecha.pressAndHold()){
-                                ventanaLog.append( internal.getTime() + " --- Movimiento hacia la derecha")
-                            }
                             internal.sendCommandToBackend(btnDerecha)
                         }
                     }
@@ -1052,21 +1036,21 @@ Page{
             ventanaLog.clear()
         }
 
-        function onCommBack_Front(msg){
+        function onSignalCommSerieFailed(msg){
             // Caso en el cual estamos trabajando y se detecta un problema con el USB
             if(statusCommUSB.color == verde || statusCommUSB.color == gris ){
                 ventanaLog.append(internal.getTime()+ " --- " + msg)
             }
         }
 
-        function onActual_graf_grados_signal(acimut,elevacion){
+        function onSignalActualGraf(acimut,elevacion){
             // Actualización del gauge de acimut
             gaugeAcimut.value = acimut
             // Actualización del gauge de elevación
             gaugeElevacion.value = elevacion
         }
 
-        function onSignal_To_FrontEnd(Signal_ID,Signal_Msg){
+        function onSignalChangeStateFrontEnd(Signal_ID,Signal_Msg){
             if(Signal_ID === "USB"){
                 switch(Signal_Msg){
                     case "Good":
@@ -1135,6 +1119,10 @@ Page{
                         break;
                 }
             }
+        }
+
+        function onSignalCommBackFront(msg){
+            ventanaLog.append(internal.getTime()+ " --- " + msg)
         }
 
     }
