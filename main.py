@@ -262,6 +262,8 @@ class VentanaPrincipal(QObject):
                     if Data_Command[0] == "A" and Data_Command[2] == "E":
                         Raw_acimut = Data_Command[1]
                         Raw_elevacion = Data_Command[3]
+                        print(Raw_acimut)
+                        print(Raw_elevacion)
                         self.signalActualGraf.emit(float(Raw_acimut), float(Raw_elevacion))
                         return 1    #Recepción de comando OK
                     else:
@@ -328,7 +330,7 @@ class VentanaPrincipal(QObject):
                                 Serial_PORT.open()
                                 self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset por si tocan botones manuales sin conexión con dispositivo
                                 self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset por si tocan botones manuales sin conexión con dispositivo
-                                self.timerActualGraf.start(30 * SECOND)                 # Arranque al timer de actualización gráfica
+                                self.timerActualGraf.start(1 * SECOND)                 # Arranque al timer de actualización gráfica
                             except:
                                 self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
                                 self.signalChangeStateFrontEnd.emit("USB", "Bad")
@@ -419,7 +421,7 @@ class VentanaPrincipal(QObject):
        fecha = datetime.strftime(objDate, '%Y-%b-%d')
 
        try:
-           file = open("comandos4.txt", 'r')
+           file = open("tracking_test.txt", 'r')
        except:
            print("No Se Encontro el Archivo de Comandos")
            return
@@ -473,10 +475,10 @@ class VentanaPrincipal(QObject):
                self.signalChangeStateFrontEnd.emit("USB - TX", "Bad")
             else:
                 if self.Recepcion_Datos() == 1:
-                    self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando Reconocido")
+                    #self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando Reconocido")
                     self.signalChangeStateFrontEnd.emit("USB - RX", "Good")
                 elif self.Recepcion_Datos() == 0:
-                    self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando No Reconocido")
+                    #self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando No Reconocido")
                     self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
                 else:
                     self.signalCommBackFront.emit("[Actualizar_Posicion()]: Recepción Erronea")
