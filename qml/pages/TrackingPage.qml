@@ -74,28 +74,12 @@ Page{
         }
 
         function showNothingdataTxt(){
-            labelEstActObjetivo.dataTxt = " - - - "
+            labelEstActAcimut.dataTxt = " - - - "
             labelEstActElevacion.dataTxt = " - - - "
         }
 
         function getTime(){
             return Qt.formatDateTime(new Date(),"dd/MM/yy  hh:mm:ss")
-        }
-
-        function changeCalibrationText(btn){
-            if(btn.text === "Calibrar Home"){
-                btnIniciar.enabled = false
-                btnFinalizar.enabled = false
-                ventanaLog.append(internal.getTime()+" --- Calibrando Home")
-                return "Term. Calibracion"
-            }else{
-                ventanaLog.append(internal.getTime()+" --- Calibración terminada")
-                disableBusyIndicators()
-                showNothingdataTxt()
-                btnIniciar.enabled = true
-                //btnFinalizar.enabled = true
-                return "Calibrar Home"
-            }
         }
 
         function sendCommandToBackend(btnClicked){
@@ -122,7 +106,31 @@ Page{
 
             }
         }
+        function iniciar_Tracking(){
+            internal.disableBusyIndicators()
+            btnIniciar.enabled = false
+            btnFinalizar.enabled = true
+            btnDetenerContinuar.enabled = true
+            checkBoxManual.checked = true
+            checkBoxManual.checkable = false
+            ventanaLog.append( internal.getTime() +" --- Tracking Iniciado")
+            backendPython.enableTracking()
+        }
 
+        function finalizar_Tracking(){
+            btnIniciar.enabled = true
+            btnFinalizar.enabled = false
+            btnDetenerContinuar.enabled = false
+            checkBoxManual.checked = false
+            checkBoxManual.checkable = true
+             ventanaLog.append( internal.getTime() +" --- Tracking Interrumpido por el Usuario")
+        }
+
+        function calibrandoHome(){
+            labelEstActAcimut.dataTxt = "Calibrando. . .       "
+            labelEstActElevacion.dataTxt = "Calibrando. . .       "
+            backendPython.calibrarHome()
+        }
     }
 
     Rectangle {
@@ -175,7 +183,7 @@ Page{
                         anchors.right: parent.right
                         anchors.top: parent.top
 
-                        anchors.rightMargin: 290
+                        anchors.rightMargin: 267
                         anchors.leftMargin: 15
                         anchors.topMargin: 10
 
@@ -252,6 +260,7 @@ Page{
                         anchors.rightMargin: 20
 
                         spacing: backGroundTracking.height/20
+
                         ButtonTracking{
                             id:btnIniciar
                             width: (rowBtnTracking.width-3*rowBtnTracking.spacing)/4
@@ -262,20 +271,9 @@ Page{
                             shadowVertical: 5
                             shadowHorizontal: 5
                             font.pointSize: 8
-                            enabled: false
+                            enabled: true
                             onClicked: {
-                                internal.disableBusyIndicators()
-
-                                labelEstActObjetivo.dataTxt = labelObjetivo.dataTxt
-                                labelEstActElevacion.dataTxt = labelInicio.dataTxt
-
-                                btnIniciar.enabled = false
-                                btnCalibrar.enabled = false
-                                btnFinalizar.enabled = true
-                                btnDetenerContinuar.enabled = true
-                                checkBoxManual.checked = true
-                                checkBoxManual.checkable = false
-                                ventanaLog.append( internal.getTime() +" --- Tracking Iniciado")
+                                internal.iniciar_Tracking()
                             }
                         }
                         ButtonTracking{
@@ -319,20 +317,9 @@ Page{
                             enabled: false
                             checkable: false
                             checked: false
-                            onClicked: {
-                                internal.disableBusyIndicators()
 
-                                labelEstActObjetivo.dataTxt = " - - - "
-                                labelEstActElevacion.dataTxt = " - - - "
-
-                                ventanaLog.append( internal.getTime() +" --- Tracking Finalizado")
-
-                                btnIniciar.enabled = true
-                                btnCalibrar.enabled = true
-                                btnFinalizar.enabled = false
-                                btnDetenerContinuar.enabled = false
-                                checkBoxManual.checked = false
-                                checkBoxManual.checkable = true
+                            onPressed:{
+                                internal.finalizar_Tracking()
                             }
                         }
 
@@ -346,11 +333,8 @@ Page{
                             shadowVertical: 5
                             shadowHorizontal: 5
                             font.pointSize: 8
-                            onClicked: {
-                                internal.enableBusyIndicators()
-                                labelEstActObjetivo.dataTxt = "Calibrando...       "
-                                labelEstActElevacion.dataTxt = "Calibrando...       "
-                                btnCalibrar.text = internal.changeCalibrationText(btnCalibrar)
+                            onPressed: {
+                                internal.calibrandoHome()
                             }
                         }
                     }
@@ -401,12 +385,6 @@ Page{
 
                         onReleased: {
                             backendPython.stopElevacion()
-                            internal.disableBusyIndicators()
-                            internal.showNothingdataTxt()
-                        }
-
-                        onPressAndHold: {
-                            //Do nothing
                         }
 
                         onPressed:{
@@ -428,8 +406,6 @@ Page{
 
                         onReleased: {
                             backendPython.stopAcimut()
-                            internal.disableBusyIndicators()
-                            internal.showNothingdataTxt()
                         }
 
                         onPressed:{
@@ -444,8 +420,6 @@ Page{
 
                         onReleased: {
                             backendPython.stopElevacion()
-                            internal.disableBusyIndicators()
-                            internal.showNothingdataTxt()
                         }
 
                         onPressed:{
@@ -459,10 +433,7 @@ Page{
                         iconSource: "../../images/svg_images/Derecha.png"
 
                         onReleased: {
-                            btnDerecha.down = false
                             backendPython.stopAcimut()
-                            internal.disableBusyIndicators()
-                            internal.showNothingdataTxt()
                         }
                         onPressed:{
                             internal.sendCommandToBackend(btnDerecha)
@@ -522,8 +493,6 @@ Page{
                     }
 
                     onReleased: {
-                        internal.disableBusyIndicators()
-                        internal.showNothingdataTxt()
                         checkBoxManual.checkable = true
                         checkBoxManual.checked = false
                     }
@@ -708,10 +677,10 @@ Page{
                         spacing: columnDataEstadoActual.height/5
 
                         Label_TextEdit{
-                            id: labelEstActObjetivo
+                            id: labelEstActAcimut
                             width: parent.width
                             height: (columnDataEstadoActual.height-columnDataEstadoActual.spacing)/2
-                            text: "Azimut"
+                            text: "Acimut"
                             altotxt: 12
                             dataTxt: " - - - "
                         }
@@ -783,7 +752,7 @@ Page{
                             x: 84
                             y: 30
                             height: 20
-                            text: "Comunicacion USB"
+                            text: "Estado Puerto USB"
                             anchors.bottom: parent.bottom
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
@@ -916,6 +885,7 @@ Page{
 
                         anchors.top: parent.top
                         anchors.bottom: parent.bottom
+                        value: 0
                         anchors.leftMargin: 20
 
                         anchors.bottomMargin: 40
@@ -1046,8 +1016,10 @@ Page{
         function onSignalActualGraf(acimut,elevacion){
             // Actualización del gauge de acimut
             gaugeAcimut.value = acimut
+            labelEstActAcimut.dataTxt = elevacion
             // Actualización del gauge de elevación
             gaugeElevacion.value = elevacion
+            labelEstActElevacion.dataTxt = elevacion
         }
 
         function onSignalChangeStateFrontEnd(Signal_ID,Signal_Msg){
@@ -1130,6 +1102,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.25;height:608;width:1218}
+    D{i:0;formeditorZoom:0.9;height:608;width:1218}
 }
 ##^##*/
