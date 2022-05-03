@@ -106,31 +106,47 @@ Page{
 
             }
         }
+
         function iniciar_Tracking(){
             internal.disableBusyIndicators()
             btnIniciar.enabled = false
             btnFinalizar.enabled = true
-            btnDetenerContinuar.enabled = true
+            btnDetenerTracking.enabled = true
             checkBoxManual.checked = true
             checkBoxManual.checkable = false
-            ventanaLog.append( internal.getTime() +" --- Tracking Iniciado")
             backendPython.enableTracking()
         }
 
         function finalizar_Tracking(){
-            btnIniciar.enabled = true
-            btnFinalizar.enabled = false
-            btnDetenerContinuar.enabled = false
-            checkBoxManual.checked = false
-            checkBoxManual.checkable = true
-             ventanaLog.append( internal.getTime() +" --- Tracking Interrumpido por el Usuario")
+            internal.defaultStateButtons()
+            backendPython.endTracking()
         }
 
-        function calibrandoHome(){
-            labelEstActAcimut.dataTxt = "Calibrando. . .       "
-            labelEstActElevacion.dataTxt = "Calibrando. . .       "
-            backendPython.calibrarHome()
+        function continuarTracking(){
+            backendPython.continueTracking()
+            checkBoxManual.checked = true
+            checkBoxManual.checkable = false
+            btnDetenerTracking.enabled = true
+            btnContinuarTracking.enabled = false
         }
+
+        function detenerTracking(){
+            backendPython.stopTracking()
+            checkBoxManual.checked = false
+            checkBoxManual.checkable = true
+            btnDetenerTracking.enabled = false
+            btnContinuarTracking.enabled = true
+        }
+
+        function defaultStateButtons(){
+            btnIniciar.enabled = true
+            btnFinalizar.enabled = false
+            btnDetenerTracking.enabled = false
+            btnContinuarTracking.enabled = false
+            checkBoxManual.checked = false
+            checkBoxManual.checkable = true
+        }
+
     }
 
     Rectangle {
@@ -272,12 +288,13 @@ Page{
                             shadowHorizontal: 5
                             font.pointSize: 8
                             enabled: true
-                            onClicked: {
+
+                            onPressed: {
                                 internal.iniciar_Tracking()
                             }
                         }
                         ButtonTracking{
-                            id:btnDetenerContinuar
+                            id:btnDetenerTracking
                             width: (rowBtnTracking.width-3*rowBtnTracking.spacing)/4
                             height: rowBtnTracking.height
                             text: "Detener Tracking"
@@ -288,21 +305,29 @@ Page{
                             shadowHorizontal: 5
                             font.pointSize: 8
                             enabled: false
-                            onClicked: {
-                                if(btnDetenerContinuar.text === "Detener Tracking"){
-                                    ventanaLog.append( internal.getTime() +" --- Tracking Detenido")
-                                    checkBoxManual.checkable = true
-                                    checkBoxManual.checked = false
 
-                                    btnDetenerContinuar.text = "Cont. Tracking"
-                                }else{
-                                    ventanaLog.append( internal.getTime() +" --- Tracking Continuado")
-                                    checkBoxManual.checked = true
-                                    checkBoxManual.checkable = false
-                                    btnDetenerContinuar.text = "Detener Tracking"
-                                }
+                            onPressed: {
+                                internal.detenerTracking()
                             }
                         }
+
+                        ButtonTracking{
+                            id: btnContinuarTracking
+                            width: (rowBtnTracking.width-3*rowBtnTracking.spacing)/4
+                            height: rowBtnTracking.height
+                            text: "Cont. Tracking"
+                            enabled: false
+                            font.italic: true
+                            font.bold: true
+                            shadowVertical: 5
+                            shadowHorizontal: 5
+                            font.pointSize: 8
+
+                            onPressed: {
+                                internal.continuarTracking()
+                            }
+                        }
+
                         ButtonTracking{
                             id: btnFinalizar
                             width: (rowBtnTracking.width-3*rowBtnTracking.spacing)/4
@@ -320,21 +345,6 @@ Page{
 
                             onPressed:{
                                 internal.finalizar_Tracking()
-                            }
-                        }
-
-                        ButtonTracking{
-                            id: btnCalibrar
-                            width: (rowBtnTracking.width-3*rowBtnTracking.spacing)/4
-                            height: rowBtnTracking.height
-                            text: "Calibrar Home"
-                            font.italic: true
-                            font.bold: true
-                            shadowVertical: 5
-                            shadowHorizontal: 5
-                            font.pointSize: 8
-                            onPressed: {
-                                internal.calibrandoHome()
                             }
                         }
                     }
@@ -752,7 +762,7 @@ Page{
                             x: 84
                             y: 30
                             height: 20
-                            text: "Estado Puerto USB"
+                            text: "Conex. con Dispositivo"
                             anchors.bottom: parent.bottom
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
@@ -1050,7 +1060,7 @@ Page{
                     case "Off":
                         statusTracking.color = gris    // Gris
                         break;
-                    case "Problem":
+                    case "Bad":
                         statusTracking.color = rojo    // Rojo
                         break;
                     default:
@@ -1095,6 +1105,10 @@ Page{
 
         function onSignalCommBackFront(msg){
             ventanaLog.append(internal.getTime()+ " --- " + msg)
+        }
+
+        function onSignalTrackingEnded(){
+            internal.defaultStateButtons()
         }
 
     }

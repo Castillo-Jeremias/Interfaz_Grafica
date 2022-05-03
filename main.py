@@ -74,6 +74,7 @@ Dict_Text_Commands = {
 Serial_PORT = serial.Serial()
 
 boolTracking_Enable = False
+
 #############################################################################################################
 #                                                Fin Constantes                                             #
 #############################################################################################################
@@ -120,7 +121,8 @@ class VentanaPrincipal(QObject):
 
     # Señal de emisión de eventos ÚNICOS (NO USAR EN STATUSPORTCOMM)
     signalCommBackFront = Signal(str)
-    
+
+    signalTrackingEnded = Signal()
     #############################################################################################################
     #                                        Fin Señales a emitir                                               #
     #############################################################################################################
@@ -150,7 +152,7 @@ class VentanaPrincipal(QObject):
 
         # Recarga de timer asociados
         self.timerAutoSave.start(1 * QTIMER_MINUTE)
-        self.timerTracking.start(1 * QTIMER_MINUTE)
+        #self.timerTracking.start(1 * QTIMER_MINUTE)
         self.timerActualGraf.start(30 * QTIMER_SECOND)
 
         # Preconfiguración necesaria. Sera lanzado luego de conectarse con el dispositivo a través del dispositivo
@@ -458,10 +460,17 @@ class VentanaPrincipal(QObject):
     @Slot()
     def enableTracking(self):
         global boolTracking_Enable
-        boolTracking_Enable = True
-        self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-        self.signalCommBackFront.emit("[enableTracking()]: Tracking Habilitado")
-        self.timerTracking_v2.start(1 * QTIMER_MINUTE)
+        try:
+            objFile = open("tracking_test.txt", 'r')
+        except:
+            self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
+            self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
+            self.signalTrackingEnded.emit()
+        else:
+            boolTracking_Enable = True
+            self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+            self.signalCommBackFront.emit("[enableTracking()]: Tracking Habilitado")
+            self.timerTracking_v2.start(1 * QTIMER_MINUTE)
 
     @Slot()
     def stopTracking(self):
@@ -471,18 +480,25 @@ class VentanaPrincipal(QObject):
         self.signalCommBackFront.emit("[stopTracking()]: Tracking Detenido")
 
     @Slot()
+    def continueTracking(self):
+        global boolTracking_Enable
+        boolTracking_Enable = True
+        self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+        self.signalCommBackFront.emit("[continueTracking()]: Tracking Reanudado")
+
+    @Slot()
     def endTracking(self):
         global boolTracking_Enable
         boolTracking_Enable = False
         self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-        self.signalCommBackFront.emit("[endTracking()]: Tracking Ineterrumpido")
+        self.signalCommBackFront.emit("[endTracking()]: Tracking Interrumpido")
+        self.signalTrackingEnded.emit()
         self.timerTracking_v2.stop()
 
     def Control_autonomo_v2_0(self):
-
+        global boolTracking_Enable
         objTimeNow = datetime.datetime.now()
         sMinuteNow = objTimeNow.strftime('%M')
-
         try:
             objFile = open("tracking_test.txt", 'r')
             iTotalLines = sum(1 for sLineAct in objFile)   # Cantidad de comandos a enviar
@@ -490,6 +506,7 @@ class VentanaPrincipal(QObject):
         except:
             self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
             self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
+            self.timerTracking_v2.stop()
             return
         else:
             if(boolTracking_Enable == True):
@@ -520,17 +537,17 @@ class VentanaPrincipal(QObject):
                     iCantLineasLeidas = iCantLineasLeidas + 1
                 else:
                     if(iCantLineasLeidas == iTotalLines and boolTracking_Enable == True):
-                        global boolTracking_Enable
                         self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-                        self.signalCommBackFront.emit("[Tracking]: Se han Enviado Todos los Ángulos Exitosamente. Tracking Abortado")
+                        self.signalCommBackFront.emit("[Tracking]: No Hay más Datos a enviar. Tracking Finalizado")
                         boolTracking_Enable = False
                         self.timerTracking_v2.stop()
+                        self.signalTrackingEnded.emit()
         finally:
             sLastMinute = objTimeNow.strftime('%M')
             objFile.close()
 
     def Control_autonomo_v2_0_log_test(self):
-
+        global boolTracking_Enable
         objTimeNow = datetime.datetime.now()
         sMinuteNow = objTimeNow.strftime('%M')
         sLastMinute = 0
@@ -554,19 +571,21 @@ class VentanaPrincipal(QObject):
                         if listData[0] == sYearMonthDay and listData[1] == sHourMinute:
                             fDataAcimut = float(listData[2])
                             fDataElevacion = float(listData[3])
-                            sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
+                            #sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
+                            sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
                             self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-                            self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r")
+                            self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + sCmd)
                             break
                     sLinea = objFile.readline()
                     iCantLineasLeidas = iCantLineasLeidas + 1
                 else:
                     if (iCantLineasLeidas == iTotalLines and boolTracking_Enable == True):
-                        global boolTracking_Enable
                         self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-                        self.signalCommBackFront.emit("[Tracking]: Se han Enviado Todos los Ángulos Exitosamente. Tracking Abortado")
+                        self.signalCommBackFront.emit("[Tracking]: No Hay más Datos a enviar. Tracking Finalizado")
                         boolTracking_Enable = False
                         self.timerTracking_v2.stop()
+                        self.signalTrackingEnded.emit()
+
         finally:
             sLastMinute = objTimeNow.strftime('%M')
             objFile.close()
@@ -605,8 +624,8 @@ class VentanaPrincipal(QObject):
                     self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")
         else:
             self.signalCommBackFront.emit("[Actualizar_Posicion()]: Puerto Cerrado. Envió Omitido")
-            self.signalChangeStateFrontEnd.emit("USB - TX", "Problem")
-            self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
+            self.signalChangeStateFrontEnd.emit("USB - TX", "Bad")
+            self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")
 
     # Descripción:
     #
@@ -643,8 +662,8 @@ class VentanaPrincipal(QObject):
                         self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")
             else:
                 self.signalCommBackFront.emit(Dict_Text_Commands[Letra_Cmd] + ": Puerto Cerrado. Envió Omitido")
-                self.signalChangeStateFrontEnd.emit("USB - TX", "Problem")
-                self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
+                self.signalChangeStateFrontEnd.emit("USB - TX", "Bad")
+                self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")
 
     #############################################################################################################
     #                                 Fin funciones vinculadas con solicitud de ángulos                         #
