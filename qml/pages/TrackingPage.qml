@@ -495,10 +495,6 @@ Page{
                     shadowVertical: 5
 
                     onPressed: {
-                        if(!btnStop.pressAndHold()){
-                            ventanaLog.append( internal.getTime() + " --- Deteniendo movimientos")
-                        }
-                        console.log(internal.getTime() + " --- Deteniendo movimientos")
                         internal.sendCommandToBackend(btnStop)
                     }
 
