@@ -124,7 +124,7 @@ Page{
                 onAccepted:{
                     // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
                     // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
-                    backendPython.openFile(fileOpen.fileUrl)
+                    backendPython.chargeThisFile(fileOpen.fileUrl)
                 }
             }
 
@@ -137,15 +137,6 @@ Page{
 
     Connections{
         target: backendPython
-        //recordar la preposicion on delante de la funcion
-
-        /*function onCleanLogAvalible(){
-            ventanaLog.clear()
-        }
-        */
-        function onSetPortCOM(COM_Data){
-            console.log(COM_Data)
-        }
 
     }
 }
@@ -156,6 +147,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:0.66;height:608;width:1218}D{i:4;invisible:true}
+    D{i:0;autoSize:true;height:608;width:1218}D{i:4;invisible:true}
 }
 ##^##*/

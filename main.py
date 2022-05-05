@@ -100,6 +100,8 @@ class VentanaPrincipal(QObject):
     # String que almacena datos enviados desde la ventana de LOG
     DataSaved = ""
 
+    listDataCommands = []
+
     #############################################################################################################
     #                                           Señales a emitir                                                #
     #############################################################################################################
@@ -147,21 +149,23 @@ class VentanaPrincipal(QObject):
         # Ejecucion de actualizacion grafica grados
         self.timerActualGraf.timeout.connect(lambda: self.Actualizar_Posicion())
 
-        # Hilos en paralelo con la APP
-        self.timerCheckPorts.start(0 * QTIMER_SECOND)
-
         # Recarga de timer asociados
         self.timerAutoSave.start(1 * QTIMER_MINUTE)
         #self.timerTracking.start(1 * QTIMER_MINUTE)
         self.timerActualGraf.start(30 * QTIMER_SECOND)
+        self.timerCheckPorts.start(0 * QTIMER_SECOND)
 
         # Preconfiguración necesaria. Sera lanzado luego de conectarse con el dispositivo a través del dispositivo
         self.timerActualGraf.stop()
 
     #===================================== TO TEST AND DEBUGGING ==========================================
-        self.timerTracking_v2 = QTimer()
-        self.timerTracking_v2.timeout.connect(lambda: self.Control_autonomo_v2_0_log_test())
+        #self.timerTracking_v2 = QTimer()
+        #self.timerTracking_v2.timeout.connect(lambda: self.Control_autonomo_v2_0_log_test())
         #self.timerTracking_v2.start(1 * QTIMER_MINUTE)
+
+        self.timerTracking_v2_1 = QTimer()
+        self.timerTracking_v2_1.timeout.connect(lambda: self.Control_autonomo_v2_1_log_test(self.listDataCommands))
+        self.timerTracking_v2_1.start(1 * QTIMER_MINUTE)
     #=======================================================================================================
 
     # No es necesario un slot por que no recibimos datos desde UI, ni tampoco una signal dado que no mandamos nada
@@ -194,13 +198,73 @@ class VentanaPrincipal(QObject):
         file.write(self.DataToSave)
         file.close()
 
+    def checkforMaskData(self,objFileLocal):
+        strMaskToFoundUT = ' Date__(UT)__HR:MN, , ,Azi_(a-app), Elev_(a-app),'
+        strMaskToFoundZONE = ' Date_(ZONE)_HR:MN, , ,Azi_(a-app), Elev_(a-app),'
+        strLineInFile = objFileLocal.readline()
+        while len(strLineInFile) > 0:
+            if (strMaskToFoundUT or strMaskToFoundZONE) in strLineInFile:
+                objFileLocal.seek(0)    # Rewind of file
+                return True    #1 Mask Founded (UT or ZONE)
+                break
+            strLineInFile = objFileLocal.readline()
+        else:
+            objFileLocal.seek(0)  # Rewind of file
+            return False        #Mask not Founded
+
+    def appendListCommands(self,strCmd):
+        self.listDataCommands.append(strCmd)
+
+    def clearListCommands(self):
+        self.listDataCommands.clear
+
+    def setDataFormatCSV(self,objFileLocal):
+        strMarcaInicio = '$$SOE\n'
+        strMarcaFin = '$$EOE\n'
+        flaginit = 0
+        listDataCmd = []
+
+        TEST_TXT = open("C:/Users/Jeremias/Desktop/TEST_TXT.txt","w")   # Solo para testeo
+
+        listDataCmd = objFileLocal.readline()
+        while listDataCmd != strMarcaInicio:
+            listDataCmd = objFileLocal.readline()
+            if listDataCmd == '':
+                break
+        else:
+            listDataCmd = objFileLocal.readline()
+            while(listDataCmd != strMarcaFin):
+                listLineRawCmd = listDataCmd.split(",")
+                listDataCmd = listLineRawCmd[0] + "," + str(float("{0:.1f}".format(float(listLineRawCmd[3])))) + "," + str(float("{0:.1f}".format(float(listLineRawCmd[4]))))
+                listDataCmd = listDataCmd.split(' ')
+                strDataToWrite = listDataCmd[1] + "," + listDataCmd[2] + "\n"
+                TEST_TXT.write(strDataToWrite)   # Solo para testeo
+                self.appendListCommands(strDataToWrite)
+                listDataCmd = objFileLocal.readline()
+                if listDataCmd == '':
+                    break
+            else:
+                objFileLocal.seek(0)
+                TEST_TXT.close()
+                return True
+        objFileLocal.seek(0)
+        return False
+
     @Slot(str)
-    def openFile(self,filePath):
-      file = open(QUrl(filePath).toLocalFile(), "r")
-      Data = file.readlines()
-      print(Data)
-      print(type(Data))
-      file.close()
+    def chargeThisFile(self,filePath):
+        self.clearListCommands()
+        try:
+            objFileOpen = open(QUrl(filePath).toLocalFile(), "r")
+        except:
+            print("ERROR AL ABRIR TU PUTO ARCHIVO BRO")
+        else:
+            if self.checkforMaskData(objFileOpen) == True:
+                print (self.setDataFormatCSV(objFileOpen))
+                self.signalCommBackFront.emit("El Archivo de Tracking ha Sido Cargado Correctamente")
+                objFileOpen.close()
+            else:
+                self.signalCommBackFront.emit("El Archivo de Tracking no Tiene el Formato Necesario. Abortado")
+                objFileOpen.close()
 
     #############################################################################################################
     # Hay diferencia entre el autoGuardadoLog() y cleanLog() ya que aca la ejecución de esta última esta función
@@ -335,7 +399,7 @@ class VentanaPrincipal(QObject):
                                 self.signalCommSerieFailed.emit("[statusPortCOM()]: Intentando Conectar Dispositivo a través del Puerto " + USB_Port.device + "...")
                                 self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
                                 self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
-                                self.timerActualGraf.start(5 * QTIMER_SECOND)                  # Arranque al timer de actualización gráfica
+                                self.timerActualGraf.start(5 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
                             except:
                                 self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
                                 Serial_PORT.close()  # Just in case . . .
@@ -460,17 +524,18 @@ class VentanaPrincipal(QObject):
     @Slot()
     def enableTracking(self):
         global boolTracking_Enable
-        try:
-            objFile = open("tracking_test.txt", 'r')
-        except:
-            self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
-            self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
-            self.signalTrackingEnded.emit()
-        else:
-            boolTracking_Enable = True
-            self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-            self.signalCommBackFront.emit("[enableTracking()]: Tracking Habilitado")
-            self.timerTracking_v2.start(1 * QTIMER_MINUTE)
+        # try:
+        #     objFile = open("tracking_test.txt", 'r')
+        # except:
+        #     self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
+        #     self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
+        #     self.signalTrackingEnded.emit()
+        # else:
+        boolTracking_Enable = True
+        self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+        self.signalCommBackFront.emit("[enableTracking()]: Tracking Habilitado")
+        #self.timerTracking_v2.start(1 * QTIMER_MINUTE)
+        self.timerTracking_v2_1.start(1 * QTIMER_MINUTE)
 
     @Slot()
     def stopTracking(self):
@@ -493,7 +558,8 @@ class VentanaPrincipal(QObject):
         self.signalChangeStateFrontEnd.emit("Tracking", "Off")
         self.signalCommBackFront.emit("[endTracking()]: Tracking Interrumpido")
         self.signalTrackingEnded.emit()
-        self.timerTracking_v2.stop()
+        #self.timerTracking_v2_0.stop()
+        self.timerTracking_v2_1.stop()
 
     def Control_autonomo_v2_0(self):
         global boolTracking_Enable
@@ -590,6 +656,37 @@ class VentanaPrincipal(QObject):
             sLastMinute = objTimeNow.strftime('%M')
             objFile.close()
 
+    def Control_autonomo_v2_1_log_test(self,listCmd):
+        global boolTracking_Enable
+        objTimeNow = datetime.datetime.now()
+        sMinuteNow = objTimeNow.strftime('%M')
+        sLastMinute = 0
+        iTotalLines = len(listCmd)
+
+        if (boolTracking_Enable == True):
+            iCantLineasLeidas = 0
+            for strCmdAct in listCmd:
+                listCmdAct = strCmdAct.split(',')
+                sYearMonthDay = objTimeNow.strftime('%Y-%b-%d')
+                sHourMinute = objTimeNow.strftime('%H:%M')
+                if listCmdAct[0] == sYearMonthDay and listCmdAct[1] == sHourMinute:
+                    fDataAcimut = float(listCmdAct[2])
+                    fDataElevacion = float(listCmdAct[3])
+                    # sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
+                    sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
+                    self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+                    self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + sCmd)
+                    break
+                else:
+                    iCantLineasLeidas = iCantLineasLeidas + 1
+                    continue
+
+            if (iCantLineasLeidas == iTotalLines and boolTracking_Enable == True):
+                self.signalChangeStateFrontEnd.emit("Tracking", "Off")
+                self.signalCommBackFront.emit("[Tracking]: No Hay más Datos a enviar. Tracking Finalizado")
+                boolTracking_Enable = False
+                self.timerTracking_v2_1.stop()
+                self.signalTrackingEnded.emit()
     #############################################################################################################
     #                                   Fin funciones vinculadas con el tracking                                #
     #############################################################################################################
