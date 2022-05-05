@@ -224,7 +224,7 @@ class VentanaPrincipal(QObject):
         flaginit = 0
         listDataCmd = []
 
-        TEST_TXT = open("C:/Users/Jeremias/Desktop/TEST_TXT.txt","w")   # Solo para testeo
+        TEST_TXT = open("C:/Users/"+Name_User+"/Desktop/TEST_TXT.txt","w")   # Solo para testeo
 
         listDataCmd = objFileLocal.readline()
         while listDataCmd != strMarcaInicio:
@@ -256,15 +256,40 @@ class VentanaPrincipal(QObject):
         try:
             objFileOpen = open(QUrl(filePath).toLocalFile(), "r")
         except:
-            print("ERROR AL ABRIR TU PUTO ARCHIVO BRO")
+            self.signalCommBackFront.emit("Problema con la Carga de Datos. Reintentar Nuevamente.")
         else:
             if self.checkforMaskData(objFileOpen) == True:
-                print (self.setDataFormatCSV(objFileOpen))
+                self.getDataofTracking(objFileOpen)
+                self.setDataFormatCSV(objFileOpen)
                 self.signalCommBackFront.emit("El Archivo de Tracking ha Sido Cargado Correctamente")
                 objFileOpen.close()
             else:
                 self.signalCommBackFront.emit("El Archivo de Tracking no Tiene el Formato Necesario. Abortado")
                 objFileOpen.close()
+
+    def getDataofTracking(self,objFileLocal):
+
+        strMaskTarget   = "Target body name:"
+        strMaskStart    = "Start time      :"
+        strMaskStop     = "Stop  time      :"
+
+        strLineInFile = objFileLocal.readline()
+        while len(strLineInFile) > 0 and strLineInFile != '':
+            if strMaskTarget in strLineInFile:
+                listData = strLineInFile.split(" ")
+                strData = listData[3]
+                self.signalChangeStateFrontEnd.emit("Target",strData)
+            elif strMaskStart in strLineInFile:
+                listData = strLineInFile.split(" ")
+                strData = listData[9] + " " + listData[10][:8]
+                self.signalChangeStateFrontEnd.emit("Start Time",strData)
+            elif strMaskStop in strLineInFile:
+                listData = strLineInFile.split(" ")
+                strData = listData[10] + " " + listData[11][:8]
+                self.signalChangeStateFrontEnd.emit("Stop Time",strData)
+                break
+            strLineInFile = objFileLocal.readline()
+        objFileLocal.seek(0)
 
     #############################################################################################################
     # Hay diferencia entre el autoGuardadoLog() y cleanLog() ya que aca la ejecución de esta última esta función

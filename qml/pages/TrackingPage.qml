@@ -47,18 +47,6 @@ Page{
     QtObject{
         id:internal
 
-        function enableBusyIndicators(){
-            //busyFin.visible=true
-            //busyInicio.visible=true
-            //busyObj.visible=true
-        }
-
-        function disableBusyIndicators(){
-            //busyFin.visible=false
-            //busyInicio.visible=false
-            //busyObj.visible=false
-        }
-
         function disableManualButtons(){
             btnAbajo.enabled = false
             btnArriba.enabled = false
@@ -108,7 +96,6 @@ Page{
         }
 
         function iniciar_Tracking(){
-            internal.disableBusyIndicators()
             btnIniciar.enabled = false
             btnFinalizar.enabled = true
             btnDetenerTracking.enabled = true
@@ -118,8 +105,11 @@ Page{
         }
 
         function finalizar_Tracking(){
-            internal.defaultStateButtons()
+            internal.defaultStateApp()
             backendPython.endTracking()
+            labelFin.dataTxt = "- - -"
+            labelInicio.dataTxt = "- - -"
+            labelObjetivo.dataTxt = "- - -"
         }
 
         function continuarTracking(){
@@ -138,13 +128,16 @@ Page{
             btnContinuarTracking.enabled = true
         }
 
-        function defaultStateButtons(){
+        function defaultStateApp(){
             btnIniciar.enabled = true
             btnFinalizar.enabled = false
             btnDetenerTracking.enabled = false
             btnContinuarTracking.enabled = false
             checkBoxManual.checked = false
             checkBoxManual.checkable = true
+            labelFin.dataTxt = "- - -"
+            labelInicio.dataTxt = "- - -"
+            labelObjetivo.dataTxt = "- - -"
         }
 
     }
@@ -1097,6 +1090,15 @@ Page{
                         break;
                 }
             }
+            else if(Signal_ID === "Target"){
+                labelObjetivo.dataTxt = Signal_Msg
+            }
+            else if(Signal_ID === "Start Time"){
+                labelInicio.dataTxt = Signal_Msg
+            }
+            else if(Signal_ID === "Stop Time"){
+                labelFin.dataTxt = Signal_Msg
+            }
         }
 
         function onSignalCommBackFront(msg){
@@ -1104,7 +1106,7 @@ Page{
         }
 
         function onSignalTrackingEnded(){
-            internal.defaultStateButtons()
+            internal.defaultStateApp()
         }
 
     }
