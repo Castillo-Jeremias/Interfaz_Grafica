@@ -283,7 +283,20 @@ Page{
                             enabled: true
 
                             onPressed: {
-                                internal.iniciar_Tracking()
+                                fileOpen.open()
+                            }
+
+                            FileDialog{
+                                id:fileOpen
+                                title: "Cargue el archivo"
+                                folder: shortcuts.home
+                                nameFilters: ["Text File (*.txt)"]
+                                selectMultiple: false
+                                onAccepted:{
+                                    // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
+                                    // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
+                                    backendPython.chargeThisFile(fileOpen.fileUrl)
+                                }
                             }
                         }
                         ButtonTracking{
@@ -1015,90 +1028,103 @@ Page{
         function onSignalActualGraf(acimut,elevacion){
             // Actualización del gauge de acimut
             gaugeAcimut.value = acimut
-            labelEstActAcimut.dataTxt = elevacion
+            labelEstActAcimut.dataTxt = acimut
             // Actualización del gauge de elevación
             gaugeElevacion.value = elevacion
             labelEstActElevacion.dataTxt = elevacion
         }
 
         function onSignalChangeStateFrontEnd(Signal_ID,Signal_Msg){
-            if(Signal_ID === "USB"){
-                switch(Signal_Msg){
-                    case "Good":
-                        statusCommUSB.color = verde
-                        break;
-                    case "Bad":
-                        statusCommUSB.color = rojo
-                        break;
-                    case "Problem":
-                        statusCommUSB.color = amarillo
-                        break;
-                    default:
-                        statusCommUSB.color = gris
-                        break;
-                }
-            }
-            else if(Signal_ID === "Tracking"){
-                switch(Signal_Msg){
-                    case "Good":
-                        statusTracking.color = verde    // Verde
-                        break;
-                    case "Stoped":
-                        statusTracking.color = amarillo    // Amarillo
-                        break;
-                    case "Off":
-                        statusTracking.color = gris    // Gris
-                        break;
-                    case "Bad":
-                        statusTracking.color = rojo    // Rojo
-                        break;
-                    default:
-                        statusTracking.color = gris     // Gris
-                        break;
-                }
-            }
-            else if(Signal_ID === "USB - RX"){
-                switch(Signal_Msg){
-                    case "Good":
-                        statusCommRX.color = verde
-                        break;
-                    case "Bad":
-                        statusCommRX.color = rojo
-                        break;
-                    case "Problem":
-                        statusCommRX.color = amarillo
-                        break;
-                    default:
-                        statusCommRX.color = gris
-                        break;
-                }
+            switch (Signal_ID){
+                case "USB":
+                    switch(Signal_Msg){
+                        case "Good":
+                            statusCommUSB.color = verde
+                            break;
+                        case "Bad":
+                            statusCommUSB.color = rojo
+                            break;
+                        case "Problem":
+                            statusCommUSB.color = amarillo
+                            break;
+                        default:
+                            statusCommUSB.color = gris
+                            break;
+                        }
+                    break;
 
+                case "Tracking":
+                    switch(Signal_Msg){
+                        case "Good":
+                            statusTracking.color = verde    // Verde
+                            break;
+                        case "Stoped":
+                            statusTracking.color = amarillo    // Amarillo
+                            break;
+                        case "Off":
+                            statusTracking.color = gris    // Gris
+                            break;
+                        case "Bad":
+                            statusTracking.color = rojo    // Rojo
+                            break;
+                        default:
+                            statusTracking.color = gris     // Gris
+                            break;
+                        }
+                    break;
+
+                case "USB - RX":
+                    switch(Signal_Msg){
+                        case "Good":
+                            statusCommRX.color = verde
+                            break;
+                        case "Bad":
+                            statusCommRX.color = rojo
+                            break;
+                        case "Problem":
+                            statusCommRX.color = amarillo
+                            break;
+                        default:
+                            statusCommRX.color = gris
+                            break;
+                        }
+                    break;
+
+                case "USB - TX":
+                    switch(Signal_Msg){
+                        case "Good":
+                            statusCommTX.color = verde
+                            break;
+                        case "Bad":
+                            statusCommTX.color = rojo
+                            break;
+                        case "Problem":
+                            statusCommTX.color = amarillo
+                            break;
+                        default:
+                            statusCommTX.color = gris
+                            break;
+                    }
+                    break;
+
+                case "Target":
+                    labelObjetivo.dataTxt = Signal_Msg
+                    break;
+
+                case "Start Time":
+                    labelInicio.dataTxt = Signal_Msg
+                    break;
+
+                case "Stop Time":
+                    labelFin.dataTxt = Signal_Msg
+                    break;
+
+                case "File Success":
+                    ventanaLog.append(internal.getTime()+ " --- " + Signal_Msg)
+                    internal.iniciar_Tracking()
+                    break;
             }
-            else if(Signal_ID === "USB - TX"){
-                switch(Signal_Msg){
-                    case "Good":
-                        statusCommTX.color = verde
-                        break;
-                    case "Bad":
-                        statusCommTX.color = rojo
-                        break;
-                    case "Problem":
-                        statusCommTX.color = amarillo
-                        break;
-                    default:
-                        statusCommTX.color = gris
-                        break;
-                }
-            }
-            else if(Signal_ID === "Target"){
-                labelObjetivo.dataTxt = Signal_Msg
-            }
-            else if(Signal_ID === "Start Time"){
-                labelInicio.dataTxt = Signal_Msg
-            }
-            else if(Signal_ID === "Stop Time"){
-                labelFin.dataTxt = Signal_Msg
-            }
+
         }
 
         function onSignalCommBackFront(msg){
@@ -1109,11 +1135,17 @@ Page{
             internal.defaultStateApp()
         }
 
+        function onSignalTrackingStopped(){
+            backendPython.stopTracking()
+            btnDetenerTracking.enabled = false
+            btnContinuarTracking.enabled = true
+            btnFinalizar.enabled = true
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.9;height:608;width:1218}
+    D{i:0;formeditorZoom:0.5;height:608;width:1218}
 }
 ##^##*/

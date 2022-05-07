@@ -125,6 +125,8 @@ class VentanaPrincipal(QObject):
     signalCommBackFront = Signal(str)
 
     signalTrackingEnded = Signal()
+
+    signalTrackingStopped = Signal()
     #############################################################################################################
     #                                        Fin Señales a emitir                                               #
     #############################################################################################################
@@ -151,20 +153,11 @@ class VentanaPrincipal(QObject):
 
         # Recarga de timer asociados
         self.timerAutoSave.start(1 * QTIMER_MINUTE)
-        #self.timerTracking.start(1 * QTIMER_MINUTE)
-        self.timerActualGraf.start(30 * QTIMER_SECOND)
         self.timerCheckPorts.start(0 * QTIMER_SECOND)
 
-        # Preconfiguración necesaria. Sera lanzado luego de conectarse con el dispositivo a través del dispositivo
-        self.timerActualGraf.stop()
-
     #===================================== TO TEST AND DEBUGGING ==========================================
-        #self.timerTracking_v2 = QTimer()
-        #self.timerTracking_v2.timeout.connect(lambda: self.Control_autonomo_v2_0_log_test())
-        #self.timerTracking_v2.start(1 * QTIMER_MINUTE)
-
         self.timerTracking_v2_1 = QTimer()
-        self.timerTracking_v2_1.timeout.connect(lambda: self.Control_autonomo_v2_1_log_test(self.listDataCommands))
+        self.timerTracking_v2_1.timeout.connect(lambda: self.Control_autonomov_2_1(self.listDataCommands))
         self.timerTracking_v2_1.start(1 * QTIMER_MINUTE)
     #=======================================================================================================
 
@@ -202,7 +195,7 @@ class VentanaPrincipal(QObject):
         strMaskToFoundUT = ' Date__(UT)__HR:MN, , ,Azi_(a-app), Elev_(a-app),'
         strMaskToFoundZONE = ' Date_(ZONE)_HR:MN, , ,Azi_(a-app), Elev_(a-app),'
         strLineInFile = objFileLocal.readline()
-        while len(strLineInFile) > 0:
+        while len(strLineInFile) > 0 and strLineInFile != '':
             if (strMaskToFoundUT or strMaskToFoundZONE) in strLineInFile:
                 objFileLocal.seek(0)    # Rewind of file
                 return True    #1 Mask Founded (UT or ZONE)
@@ -261,10 +254,10 @@ class VentanaPrincipal(QObject):
             if self.checkforMaskData(objFileOpen) == True:
                 self.getDataofTracking(objFileOpen)
                 self.setDataFormatCSV(objFileOpen)
-                self.signalCommBackFront.emit("El Archivo de Tracking ha Sido Cargado Correctamente")
+                self.signalChangeStateFrontEnd.emit("File Success", "El Archivo de Tracking ha Sido Cargado Correctamente")
                 objFileOpen.close()
             else:
-                self.signalCommBackFront.emit("El Archivo de Tracking no Tiene el Formato Necesario. Abortado")
+                self.signalCommBackFront.emit("No se ha Detectado el Formato Adecuado. Abortado")
                 objFileOpen.close()
 
     def getDataofTracking(self,objFileLocal):
@@ -318,11 +311,11 @@ class VentanaPrincipal(QObject):
     #
     # ====================================================================
 
-    def Recepcion_Datos(self):
-        if (Serial_PORT.is_open == True):
+    def Recepcion_Datos(self,objSerial):
+        if (objSerial.is_open == True):
             try:
                 # Leemos hasta encontrar un END_COMMAND = "\r\n". Si leemos hasta un END_COMMAND trabajamos siempre con un comando a la vez y nos sacamos el bardo del encolamiento
-                Data_From_MCU = Serial_PORT.read_until(END_COMMAND).decode('ascii')
+                Data_From_MCU = objSerial.read_until(END_COMMAND).decode('ascii')
             except serial.SerialException:
                 self.signalCommBackFront.emit("[Recepcion_Datos()]: No Existe Conexión con el Dispositivo")
                 self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
@@ -390,6 +383,7 @@ class VentanaPrincipal(QObject):
     #   serial.tools.list_ports.grep(): API para buscar coincidencias entre los PID y VID ingresados.
     #   Device_To_Found: Lista que contendra los puertos serie que tengan una concidencia de PID y VID con los buscados
     def statusPortCOM(self):
+        global Serial_PORT
         # Deben de ser ingresado en formato hexadecimal (sin 0x), sino no podran ser encontrados
         # ID: 0x6860 (o ID: 27620) -> 6860 (HEXADECIMAL)
         list_PID = ['6001']
@@ -404,27 +398,31 @@ class VentanaPrincipal(QObject):
                     try:
                         #Nota: Chequeo inicial del estado de la instancia para proceder a realizar una configuración de la misma en caliente (ya creada).
                         if Serial_PORT.is_open == False:
-                            Serial_PORT.port = USB_Port.device
-                            #Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
+                            #Serial_PORT.port = USB_Port.device
+                            Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
                             Serial_PORT.baudrate = 9600
                             Serial_PORT.timeout = 0.05   # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
                     except serial.SerialException:
                         if Serial_PORT.is_open == True:
                             self.signalCommSerieFailed.emit("[statusPortCOM()]: Problema con la Instancia del Puerto " + USB_Port.device)
                             self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
-                            Serial_PORT.close()     # We gonna retry later . . .
+                            Serial_PORT.close()
                         elif Serial_PORT.is_open == False:
                             self.signalCommSerieFailed.emit("[statusPortCOM()]: Desconexión Forzada del Puerto " + USB_Port.device)
                             self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
-                            Serial_PORT.close()  # Just in case . . .
+                            Serial_PORT.close()
                     else:
                         if Serial_PORT.is_open == False:
                             try:
+                                Serial_PORT.port = USB_Port.device
+                                # Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
+                                Serial_PORT.baudrate = 9600
+                                Serial_PORT.timeout = 0.05  # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
                                 Serial_PORT.open()
                                 self.signalCommSerieFailed.emit("[statusPortCOM()]: Intentando Conectar Dispositivo a través del Puerto " + USB_Port.device + "...")
                                 self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
                                 self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
-                                self.timerActualGraf.start(5 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
+                                self.timerActualGraf.start(1 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
                             except:
                                 self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
                                 Serial_PORT.close()  # Just in case . . .
@@ -434,6 +432,7 @@ class VentanaPrincipal(QObject):
                         if Serial_PORT.is_open == True:
                             self.signalChangeStateFrontEnd.emit("USB", "Good")
                         else:
+                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
                             self.signalChangeStateFrontEnd.emit("USB", "Bad")
             else:
                 self.signalCommSerieFailed.emit("[statusPortCOM()]: En Busqueda del Dispositivo...")
@@ -494,6 +493,7 @@ class VentanaPrincipal(QObject):
     def stopEverthing(self):
         #comando a enviar: "S\r"
         cmd = 'S\r'
+        self.signalTrackingStopped.emit()
         self.Enviar_Comando(cmd)
 
     #############################################################################################################
@@ -503,48 +503,6 @@ class VentanaPrincipal(QObject):
     #############################################################################################################
     #                                   Funciones vinculadas con el tracking                                    #
     #############################################################################################################
-
-    def Control_autonomo(self):
-       global data_acimut
-       global data_elevacion
-       global Flag_Enable_Send
-
-       hora_actual = time.strftime('%H:%M')
-       """ -------- Solicito fecha y la genero al formato para comparar con el archivo ----------"""
-       fecha_sin_analizar = time.strftime('%m/%d/%y')
-       objDate = datetime.datetime.strptime(fecha_sin_analizar, '%m/%d/%y')
-       fecha = datetime.datetime.strftime(objDate, '%Y-%b-%d')
-
-       try:
-           file = open("tracking_test.txt", 'r')
-       except:
-           print("No Se Encontro el Archivo de Comandos")
-           return
-       else:
-           total_lines = sum(1 for line in file)
-           file.seek(0)
-
-       linea = file.readline()
-       while len(linea) > 0:
-           dato1 = linea.split(',')
-           if dato1[0] != '\n':
-               if fecha == dato1[0] and dato1[1] == hora_actual:
-                  data_acimut = dato1[2]
-                  data_elevacion = dato1[3]
-                  parametros = "P" + str(float(dato1[2])) + " " + str(float(dato1[3]))
-                  Serial_PORT.write(parametros.encode('ascii') + b'\r')
-                  if self.Recepcion_Datos() == 1:
-                      self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-                      file.close()
-                      break
-                  elif self.Recepcion_Datos() == 0:
-                      self.signalChangeStateFrontEnd.emit("Tracking", "Problem")
-                      file.close()
-                      break
-           elif dato1[0] == '':     # Fin de archivo detectado
-                   self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-                   file.close()
-           linea = file.readline()
 
     @Slot()
     def enableTracking(self):
@@ -586,102 +544,7 @@ class VentanaPrincipal(QObject):
         #self.timerTracking_v2_0.stop()
         self.timerTracking_v2_1.stop()
 
-    def Control_autonomo_v2_0(self):
-        global boolTracking_Enable
-        objTimeNow = datetime.datetime.now()
-        sMinuteNow = objTimeNow.strftime('%M')
-        try:
-            objFile = open("tracking_test.txt", 'r')
-            iTotalLines = sum(1 for sLineAct in objFile)   # Cantidad de comandos a enviar
-            objFile.seek(0) # Rebobinado de archivo a primera línea
-        except:
-            self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
-            self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
-            self.timerTracking_v2.stop()
-            return
-        else:
-            if(boolTracking_Enable == True):
-                iCantLineasLeidas = 0
-                sLinea = objFile.readline()
-                while len(sLinea) > 0:
-                    listData = sLinea.split(',')
-                    if listData[0] != '\n':
-                        sYearMonthDay = objTimeNow.strftime('%Y-%b-%d')
-                        sHourMinute = objTimeNow.strftime('%H:%M')
-                        if listData[0] == sYearMonthDay and listData[1] == sHourMinute:
-                            fDataAcimut = float(listData[2])
-                            fDataElevacion = float(listData[3])
-                            sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
-                            self.Enviar_Comando(sCmd)
-                            if self.Recepcion_Datos() == 1:
-                                self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-                                self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Comando Reconocido")
-                                break
-                            elif self.Recepcion_Datos() == 0:
-                                self.signalChangeStateFrontEnd.emit("Tracking", "Problem")
-                                self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Comando No Reconocido")
-                                break
-                            else:
-                                self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
-                                self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Recepción Erronea")
-                    sLinea = objFile.readline()
-                    iCantLineasLeidas = iCantLineasLeidas + 1
-                else:
-                    if(iCantLineasLeidas == iTotalLines and boolTracking_Enable == True):
-                        self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-                        self.signalCommBackFront.emit("[Tracking]: No Hay más Datos a enviar. Tracking Finalizado")
-                        boolTracking_Enable = False
-                        self.timerTracking_v2.stop()
-                        self.signalTrackingEnded.emit()
-        finally:
-            sLastMinute = objTimeNow.strftime('%M')
-            objFile.close()
-
-    def Control_autonomo_v2_0_log_test(self):
-        global boolTracking_Enable
-        objTimeNow = datetime.datetime.now()
-        sMinuteNow = objTimeNow.strftime('%M')
-        sLastMinute = 0
-        try:
-            objFile = open("tracking_test.txt", 'r')
-            iTotalLines = sum(1 for sLineAct in objFile)   # Cantidad de comandos a enviar
-            objFile.seek(0) # Rebobinado de archivo a primera línea
-        except:
-            self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
-            self.signalCommBackFront.emit("[Control_Autonomo_v2_0()]: Archivo de Tracking no Encontrado. Tracking Abortado")
-            return
-        else:
-            if (boolTracking_Enable == True):
-                iCantLineasLeidas = 0
-                sLinea = objFile.readline()
-                while len(sLinea) > 0:
-                    listData = sLinea.split(',')
-                    if listData[0] != '\n':
-                        sYearMonthDay = objTimeNow.strftime('%Y-%b-%d')
-                        sHourMinute = objTimeNow.strftime('%H:%M')
-                        if listData[0] == sYearMonthDay and listData[1] == sHourMinute:
-                            fDataAcimut = float(listData[2])
-                            fDataElevacion = float(listData[3])
-                            #sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
-                            sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
-                            self.signalChangeStateFrontEnd.emit("Tracking", "Good")
-                            self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + sCmd)
-                            break
-                    sLinea = objFile.readline()
-                    iCantLineasLeidas = iCantLineasLeidas + 1
-                else:
-                    if (iCantLineasLeidas == iTotalLines and boolTracking_Enable == True):
-                        self.signalChangeStateFrontEnd.emit("Tracking", "Off")
-                        self.signalCommBackFront.emit("[Tracking]: No Hay más Datos a enviar. Tracking Finalizado")
-                        boolTracking_Enable = False
-                        self.timerTracking_v2.stop()
-                        self.signalTrackingEnded.emit()
-
-        finally:
-            sLastMinute = objTimeNow.strftime('%M')
-            objFile.close()
-
-    def Control_autonomo_v2_1_log_test(self,listCmd):
+    def Control_autonomov_2_1(self,listCmd):
         global boolTracking_Enable
         objTimeNow = datetime.datetime.now()
         sMinuteNow = objTimeNow.strftime('%M')
@@ -697,11 +560,21 @@ class VentanaPrincipal(QObject):
                 if listCmdAct[0] == sYearMonthDay and listCmdAct[1] == sHourMinute:
                     fDataAcimut = float(listCmdAct[2])
                     fDataElevacion = float(listCmdAct[3])
-                    # sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
-                    sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
-                    self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+                    sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
+                    #sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
                     self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + sCmd)
-                    break
+                    self.Enviar_Comando(sCmd)
+                    if self.Recepcion_Datos(Serial_PORT) == 1:
+                        self.signalChangeStateFrontEnd.emit("Tracking", "Good")
+                        self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Comando Reconocido")
+                        break
+                    elif self.Recepcion_Datos(Serial_PORT) == 0:
+                        self.signalChangeStateFrontEnd.emit("Tracking", "Problem")
+                        self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Comando No Reconocido")
+                        break
+                    else:
+                        self.signalChangeStateFrontEnd.emit("Tracking", "Bad")
+                        self.signalCommBackFront.emit("[Control_autonomo_v2_0()]: Recepción Erronea")
                 else:
                     iCantLineasLeidas = iCantLineasLeidas + 1
                     continue
@@ -735,10 +608,10 @@ class VentanaPrincipal(QObject):
                self.signalCommBackFront.emit("[Actualizar_Posicion()]: Falla de Envió por Puerto Serie")
                self.signalChangeStateFrontEnd.emit("USB - TX", "Bad")
             else:
-                if self.Recepcion_Datos() == 1:
+                if self.Recepcion_Datos(Serial_PORT) == 1:
                     #self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando Reconocido")
                     self.signalChangeStateFrontEnd.emit("USB - RX", "Good")
-                elif self.Recepcion_Datos() == 0:
+                elif self.Recepcion_Datos(Serial_PORT) == 0:
                     #self.signalCommBackFront.emit("[Actualizar_Posicion()]: Comando No Reconocido")
                     self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
                 else:
@@ -762,7 +635,7 @@ class VentanaPrincipal(QObject):
     #   Dict_Text_Commands[Letra_Cmd]: Texto Asociado al Comando a Ser enviado a la APP.
     def Enviar_Comando(self,Command):
         Letra_Cmd = Command[:1]
-        while (self.timerActualGraf.remainingTime() == 0):    # Cuidado si se modifica o elimina timerActualGraf (QTimer)
+        while(self.timerActualGraf.remainingTime() == 0):    # Cuidado si se modifica o elimina timerActualGraf (QTimer)
             time.sleep(0.001)  # Sleep de 1 mS
         else:
             if (Serial_PORT.is_open == True):
@@ -773,10 +646,10 @@ class VentanaPrincipal(QObject):
                     self.signalCommBackFront.emit(Dict_Text_Commands[Letra_Cmd]  + ": Falla de Envió por Puerto Serie")
                     self.signalChangeStateFrontEnd.emit("USB - TX", "Bad")
                 else:
-                    if self.Recepcion_Datos() == 1:
+                    if self.Recepcion_Datos(Serial_PORT) == 1:
                         self.signalCommBackFront.emit(Dict_Text_Commands[Letra_Cmd] + ": Comando Reconocido")
                         self.signalChangeStateFrontEnd.emit("USB - RX", "Good")
-                    elif self.Recepcion_Datos() == 0:
+                    elif self.Recepcion_Datos(Serial_PORT) == 0:
                         self.signalCommBackFront.emit(Dict_Text_Commands[Letra_Cmd] + ": Comando No Reconocido")
                         self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
                     else:
