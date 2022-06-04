@@ -67,7 +67,8 @@ Dict_Text_Commands = {
     'R' : '[moveToRight()]',
     'A' : '[stopAcimut()]',
     'E' : '[stopElevacion()]',
-    'S' : '[stopEverthing()]'
+    'S' : '[stopEverthing()]',
+    'P' : '[Act_Posicion()]'
 }
 
 # Instanciación de Puerto Serie, a la espera de una conexión.
@@ -75,6 +76,7 @@ Serial_PORT = serial.Serial()
 
 boolTracking_Enable = False
 
+boolDEBUG = True
 #############################################################################################################
 #                                                Fin Constantes                                             #
 #############################################################################################################
@@ -159,6 +161,10 @@ class VentanaPrincipal(QObject):
         self.timerTracking_v2_1 = QTimer()
         self.timerTracking_v2_1.timeout.connect(lambda: self.Control_autonomov_2_1(self.listDataCommands))
         self.timerTracking_v2_1.start(1 * QTIMER_MINUTE)
+
+        self.timerCheckRX = QTimer()
+        self.timerCheckRX.timeout.connect(lambda: self.getDataRXPort())
+        self.timerCheckRX.start(0 * QTIMER_SECOND)
     #=======================================================================================================
 
     # No es necesario un slot por que no recibimos datos desde UI, ni tampoco una signal dado que no mandamos nada
@@ -314,25 +320,44 @@ class VentanaPrincipal(QObject):
     def Recepcion_Datos(self,objSerial):
         if (objSerial.is_open == True):
             try:
-                # Leemos hasta encontrar un END_COMMAND = "\r\n". Si leemos hasta un END_COMMAND trabajamos siempre con un comando a la vez y nos sacamos el bardo del encolamiento
-                Data_From_MCU = objSerial.read_until(END_COMMAND).decode('ascii')
+                if(objSerial.inWaiting() > 0):
+                    # Leemos hasta encontrar un END_COMMAND = "\r\n". Si leemos hasta un END_COMMAND trabajamos siempre con un comando a la vez y nos sacamos el bardo del encolamiento
+                    Data_From_MCU = objSerial.read_until(END_COMMAND).decode('ascii')
+                else:
+                    #No hay caracteres en el buffer de recepción.
+                    return
             except serial.SerialException:
                 self.signalCommBackFront.emit("[Recepcion_Datos()]: No Existe Conexión con el Dispositivo")
-                self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")
-                return -1 # Error
+                self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")
             else:
-                self.signalChangeStateFrontEnd.emit("USB - RX", "Good")
-                if(len(Data_From_MCU) >= 2 and len(Data_From_MCU) <= 4):
+                if Data_From_MCU == '\r\n' or Data_From_MCU == '?>\r\n':
                     # ======================= FOR DEBUGGING =======================#
                     #print("Número de caracteres en puerto serie Man: " + str(len(Data_From_MCU)))
                     #print("Lectura de puerto serie Manual: " + Data_From_MCU)
                     # ======================= FOR DEBUGGING =======================#
                     if Data_From_MCU == '\r\n':
-                        return 1    #Recepción de comando OK
+                        self.signalChangeStateFrontEnd.emit("USB - RX", "Good")     #Recepción de comando OK
                     elif Data_From_MCU == '?>\r\n':
-                        return 0    #Recepción de comando NOT OK
+                        self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")  #Recepción de comando NOT OK
                     else:
-                        return -1 # Error
+                        self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")      #Error
+
+                elif Data_From_MCU[0] == 'C':
+
+                    Data_Split = Data_From_MCU.split('\r\n')
+                    # Una vez realizado el split tenemos la información de la siguiente manera:
+                    #   Data_Split = ['Cx', '']   ---  x : Valor entero posible -1, 0, 1.
+                    #   Index list   | 0  | 1 |
+
+                    Data_Command = Data_Split[0]
+
+                    if Data_Command == 'C0':
+                        self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Detectada")
+                    elif Data_Command == 'C1':
+                        self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Finalizada")
+                    else:
+                        self.signalCommBackFront.emit("[Recepcion_Datos()]: Error de Calibración")
+
                 else:
                     # ======================= FOR DEBUGGING =======================#
                     #print("Número de caracteres en puerto serie Ángulos: " + str(len(Data_From_MCU)))
@@ -352,12 +377,10 @@ class VentanaPrincipal(QObject):
                     if Data_Command[0] == "A" and Data_Command[2] == "E":
                         Raw_acimut = Data_Command[1]
                         Raw_elevacion = Data_Command[3]
-                        print(Raw_acimut)
-                        print(Raw_elevacion)
                         self.signalActualGraf.emit(float(Raw_acimut), float(Raw_elevacion))
-                        return 1    #Recepción de comando OK
+                        self.signalChangeStateFrontEnd.emit("USB - RX", "Good")     #Recepción de comando OK
                     else:
-                        return 0    #Recepción de comando NOT OK
+                        self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")  #Recepción de comando NOT OK
 
     #############################################################################################################
     #                                       Fin funciones de puerto serie                                       #
@@ -392,48 +415,54 @@ class VentanaPrincipal(QObject):
         for Index in range(len(list_PID)):
             # Procedemos a buscar el dispositivo que contenga PID en su descriptor de HW
             # Si la lista es de longitud distinta de cero es por que hay un dispositivo que matcheo con el PID ingresado
+
             Device_To_Found = list(serial.tools.list_ports.grep(list_VID[Index] + ':' + list_PID[Index]))
-            if len(Device_To_Found) != 0:
-                for USB_Port in Device_To_Found:
-                    try:
-                        #Nota: Chequeo inicial del estado de la instancia para proceder a realizar una configuración de la misma en caliente (ya creada).
-                        if Serial_PORT.is_open == False:
-                            #Serial_PORT.port = USB_Port.device
-                            Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
-                            Serial_PORT.baudrate = 9600
-                            Serial_PORT.timeout = 0.05   # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
-                    except serial.SerialException:
-                        if Serial_PORT.is_open == True:
-                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Problema con la Instancia del Puerto " + USB_Port.device)
-                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
-                            Serial_PORT.close()
-                        elif Serial_PORT.is_open == False:
-                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Desconexión Forzada del Puerto " + USB_Port.device)
-                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
-                            Serial_PORT.close()
-                    else:
-                        if Serial_PORT.is_open == False:
-                            try:
-                                Serial_PORT.port = USB_Port.device
-                                # Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
+
+            if len(Device_To_Found) != 0 or boolDEBUG == True:
+                if(boolDEBUG):
+                    if Serial_PORT.is_open == False:
+                        Serial_PORT = serial.Serial("COM2",9600)
+                else:
+                    for USB_Port in Device_To_Found:
+                        try:
+                            #Nota: Chequeo inicial del estado de la instancia para proceder a realizar una configuración de la misma en caliente (ya creada).
+                            if Serial_PORT.is_open == False:
+                                #Serial_PORT.port = USB_Port.device
+                                Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
                                 Serial_PORT.baudrate = 9600
-                                Serial_PORT.timeout = 0.05  # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
-                                Serial_PORT.open()
-                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Intentando Conectar Dispositivo a través del Puerto " + USB_Port.device + "...")
-                                self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
-                                self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
-                                self.timerActualGraf.start(1 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
-                            except:
-                                self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
-                                Serial_PORT.close()  # Just in case . . .
-                            else:
-                                self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡¡ Dispositivo Conectado en el Puerto " + USB_Port.device + " !!")
-                    finally:
-                        if Serial_PORT.is_open == True:
-                            self.signalChangeStateFrontEnd.emit("USB", "Good")
+                                Serial_PORT.timeout = 0.05   # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
+                        except serial.SerialException:
+                            if Serial_PORT.is_open == True:
+                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Problema con la Instancia del Puerto " + USB_Port.device)
+                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
+                                Serial_PORT.close()
+                            elif Serial_PORT.is_open == False:
+                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Desconexión Forzada del Puerto " + USB_Port.device)
+                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
+                                Serial_PORT.close()
                         else:
-                            self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
-                            self.signalChangeStateFrontEnd.emit("USB", "Bad")
+                            if Serial_PORT.is_open == False:
+                                try:
+                                    Serial_PORT.port = USB_Port.device
+                                    # Serial_PORT.port = "COM2"  # Debug con termite y VSPE para virtualizar puertos
+                                    Serial_PORT.baudrate = 9600
+                                    Serial_PORT.timeout = 0.05  # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
+                                    Serial_PORT.open()
+                                    self.signalCommSerieFailed.emit("[statusPortCOM()]: Intentando Conectar Dispositivo a través del Puerto " + USB_Port.device + "...")
+                                    self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
+                                    self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
+                                    self.timerActualGraf.start(1 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
+                                except:
+                                    self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
+                                    Serial_PORT.close()  # Just in case . . .
+                                else:
+                                    self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡¡ Dispositivo Conectado en el Puerto " + USB_Port.device + " !!")
+                        finally:
+                            if Serial_PORT.is_open == True:
+                                self.signalChangeStateFrontEnd.emit("USB", "Good")
+                            else:
+                                self.signalCommSerieFailed.emit("[statusPortCOM()]: Cerrando Conexión con el Puerto  " + USB_Port.device)
+                                self.signalChangeStateFrontEnd.emit("USB", "Bad")
             else:
                 self.signalCommSerieFailed.emit("[statusPortCOM()]: En Busqueda del Dispositivo...")
                 self.signalChangeStateFrontEnd.emit("USB", "Problem")
@@ -561,7 +590,6 @@ class VentanaPrincipal(QObject):
                     fDataAcimut = float(listCmdAct[2])
                     fDataElevacion = float(listCmdAct[3])
                     sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
-                    #sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion)
                     self.signalCommBackFront.emit("[Tracking]: Comando Generado: " + sCmd)
                     self.Enviar_Comando(sCmd)
                     if self.Recepcion_Datos(Serial_PORT) == 1:
