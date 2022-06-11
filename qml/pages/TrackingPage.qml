@@ -1133,6 +1133,7 @@ Page{
 
         function onSignalTrackingEnded(){
             internal.defaultStateApp()
+            backendPython.endTracking()
         }
 
         function onSignalTrackingStopped(){
