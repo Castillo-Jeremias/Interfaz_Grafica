@@ -15,30 +15,6 @@ Page{
     property string amarillo: "#fff700"
     property string rojo: "#ff0000"
 
-    /*Ingreso de comandos manuales por teclado*/
-    Keys.onPressed:{
-        if(event.key === Qt.Key_Up && !checkBoxManual.checked && !btnAbajo.down){
-            //console.log("[Tracking Page] Tecla Arriba Presionada")
-            //btnArriba.clicked()
-        }
-
-        if(event.key === Qt.Key_Down && !checkBoxManual.checked && !btnArriba.down){
-            //console.log("[Tracking Page] Tecla Abajo Presionada")
-            //btnAbajo.clicked()
-        }
-
-        if(event.key === Qt.Key_Left && !checkBoxManual.checked && !btnIzquierda.down){
-            //console.log("[Tracking Page] Tecla Izquierda Presionada")
-            //btnIzquierda.clicked()
-        }
-
-        if(event.key === Qt.Key_Right && !checkBoxManual.checked && !btnDerecha.down){
-            //console.log("[Tracking Page] Tecla Derecha Presionada")
-            btnDerecha.clicked()
-        }
-
-    }
-
     id: trackingpage
     focus: true
     implicitHeight: 1218
@@ -138,6 +114,15 @@ Page{
             labelFin.dataTxt = "- - -"
             labelInicio.dataTxt = "- - -"
             labelObjetivo.dataTxt = "- - -"
+        }
+
+        function disableAllButtons(){
+            btnIniciar.enabled = false
+            btnFinalizar.enabled = false
+            btnDetenerTracking.enabled = false
+            btnContinuarTracking.enabled = false
+            checkBoxManual.checked = true
+            checkBoxManual.checkable = false
         }
 
     }
@@ -820,7 +805,7 @@ Page{
                             x: 315
                             y: 3
                             height: 20
-                            text: "USB - Transmición"
+                            text: "USB - Transmisión"
                             anchors.bottom: parent.bottom
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
@@ -1131,22 +1116,46 @@ Page{
             ventanaLog.append(internal.getTime()+ " --- " + msg)
         }
 
-        function onSignalTrackingEnded(){
-            internal.defaultStateApp()
-            backendPython.endTracking()
+        function onSignalTracking(msgCode){
+            switch (msgCode){
+
+                case "End":
+                    internal.defaultStateApp()
+                    backendPython.endTracking()
+                    break;
+
+                case "Stop":
+                    backendPython.stopTracking()
+                    internal.detenerTracking()
+                    break;
+            }
+
         }
 
-        function onSignalTrackingStopped(){
-            backendPython.stopTracking()
-            btnDetenerTracking.enabled = false
-            btnContinuarTracking.enabled = true
-            btnFinalizar.enabled = true
+        function onSignalCalibration(msgCode){
+            switch (msgCode){
+
+                case "C0":
+                    backendPython.stopTracking()
+                    internal.defaultStateApp()
+                    internal.disableAllButtons()
+                    break;
+
+                case "C1":
+                    internal.defaultStateApp()
+                    break;
+
+                case "C-1":
+                    // ACA PODEMOS PONER ALGO DE AVISO EN ALGUNA LUZ O ALGO QUE SE YO
+                    break;
+            }
         }
+
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5;height:608;width:1218}
+    D{i:0;height:608;width:1218}
 }
 ##^##*/
