@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.15.2, 2022-06-11T19:37:08. -->
+<!-- Written by QtCreator 4.15.2, 2022-08-23T21:06:03. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -178,7 +178,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">D:/Ground Station Controller/Interfaz_Grafica/main.py</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">PythonEditor.RunConfiguration.D:/Ground Station Controller/Interfaz_Grafica/main.py</value>
     <value type="QString" key="ProjectExplorer.RunConfiguration.BuildKey">D:/Ground Station Controller/Interfaz_Grafica/main.py</value>
-    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{d914182c-c4f1-46ed-a2e1-392d909a2e55}</value>
+    <value type="QString" key="PythonEditor.RunConfiguation.Interpreter">{df0bfefa-0249-40c7-863d-5f3122acd4ac}</value>
     <value type="QString" key="PythonEditor.RunConfiguation.Script">D:\Ground Station Controller\Interfaz_Grafica\main.py</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

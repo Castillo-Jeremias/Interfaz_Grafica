@@ -49,23 +49,23 @@ Page{
         function sendCommandToBackend(btnClicked){
             switch(btnClicked){
             case btnArriba:
-                backendPython.moveUp()
+                backendTrackingPage.moveUp()
                 break
 
             case btnAbajo:
-                backendPython.moveDown()
+                backendTrackingPage.moveDown()
                 break
 
             case btnIzquierda:
-                backendPython.moveToLeft()
+                backendTrackingPage.moveToLeft()
                 break
 
             case btnDerecha:
-                backendPython.moveToRight()
+                backendTrackingPage.moveToRight()
                 break
 
             case btnStop:
-                backendPython.stopEverthing()
+                backendTrackingPage.stopEverthing()
                 break
 
             }
@@ -77,19 +77,19 @@ Page{
             btnDetenerTracking.enabled = true
             checkBoxManual.checked = true
             checkBoxManual.checkable = false
-            backendPython.enableTracking()
+            backendTrackingPage.enableTracking()
         }
 
         function finalizar_Tracking(){
             internal.defaultStateApp()
-            backendPython.endTracking()
+            backendTrackingPage.endTracking()
             labelFin.dataTxt = "- - -"
             labelInicio.dataTxt = "- - -"
             labelObjetivo.dataTxt = "- - -"
         }
 
         function continuarTracking(){
-            backendPython.continueTracking()
+            backendTrackingPage.continueTracking()
             checkBoxManual.checked = true
             checkBoxManual.checkable = false
             btnDetenerTracking.enabled = true
@@ -97,7 +97,7 @@ Page{
         }
 
         function detenerTracking(){
-            backendPython.stopTracking()
+            backendTrackingPage.stopTracking()
             checkBoxManual.checked = false
             checkBoxManual.checkable = true
             btnDetenerTracking.enabled = false
@@ -280,7 +280,7 @@ Page{
                                 onAccepted:{
                                     // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
                                     // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
-                                    backendPython.chargeThisFile(fileOpen.fileUrl)
+                                    backendTrackingPage.chargeThisFile(fileOpen.fileUrl)
                                 }
                             }
                         }
@@ -385,7 +385,7 @@ Page{
                         iconSource: "../../images/svg_images/Arriba.png"
 
                         onReleased: {
-                            backendPython.stopElevacion()
+                            backendTrackingPage.stopElevacion()
                         }
 
                         onPressed:{
@@ -406,7 +406,7 @@ Page{
                         iconSource: "../../images/svg_images/Izquierda.png"
 
                         onReleased: {
-                            backendPython.stopAcimut()
+                            backendTrackingPage.stopAcimut()
                         }
 
                         onPressed:{
@@ -420,7 +420,7 @@ Page{
                         iconSource: "../../images/svg_images/Abajo.png"
 
                         onReleased: {
-                            backendPython.stopElevacion()
+                            backendTrackingPage.stopElevacion()
                         }
 
                         onPressed:{
@@ -434,7 +434,7 @@ Page{
                         iconSource: "../../images/svg_images/Derecha.png"
 
                         onReleased: {
-                            backendPython.stopAcimut()
+                            backendTrackingPage.stopAcimut()
                         }
                         onPressed:{
                             internal.sendCommandToBackend(btnDerecha)
@@ -573,7 +573,7 @@ Page{
                         anchors.rightMargin: 130
                         onClicked: {
                             // Abre la ventana de Windows para seleccionar una dirección
-                            backendPython.cleanLog(ventanaLog.getFormattedText(0,ventanaLog.length))
+                            backendTrackingPage.cleanLog(ventanaLog.getFormattedText(0,ventanaLog.length))
                         }
                     }
 
@@ -587,8 +587,8 @@ Page{
                         onAccepted:{
                             // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
                             // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
-                            backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
-                            backendPython.saveFile(fileSave.fileUrl)
+                            backendTrackingPage.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
+                            backendTrackingPage.saveFile(fileSave.fileUrl)
                         }
                     }
                 }
@@ -991,11 +991,11 @@ Page{
     }
 
     Connections{
-        target: backendPython
+        target: backendTrackingPage
         //recordar la preposicion on delante de la funcion
 
         function onActualizarDataToSave(){
-            backendPython.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
+            backendTrackingPage.saveDataLog(ventanaLog.getFormattedText(0,ventanaLog.length))
             //Guardado de la información de LOG cada "X" de tiempo. Este "X" se define en el backend de Python
         }
 
@@ -1121,11 +1121,11 @@ Page{
 
                 case "End":
                     internal.defaultStateApp()
-                    backendPython.endTracking()
+                    backendTrackingPage.endTracking()
                     break;
 
                 case "Stop":
-                    backendPython.stopTracking()
+                    backendTrackingPage.stopTracking()
                     internal.detenerTracking()
                     break;
             }
@@ -1136,7 +1136,7 @@ Page{
             switch (msgCode){
 
                 case "C0":
-                    backendPython.stopTracking()
+                    backendTrackingPage.stopTracking()
                     internal.defaultStateApp()
                     internal.disableAllButtons()
                     break;

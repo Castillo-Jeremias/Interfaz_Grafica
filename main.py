@@ -96,7 +96,7 @@ boolDEBUG = True
 '''
 # ======================================================================================= #
 
-class classBackend(QObject):
+class classBackendTrackingPage(QObject):
 
     # String que almacena datos enviados desde la ventana de LOG
     DataToSave = ""
@@ -337,11 +337,14 @@ class classBackend(QObject):
 
             if len(Device_To_Found) != 0 or boolDEBUG == True:
                 if boolDEBUG:
-                    if Serial_PORT.is_open == False:
-                        Serial_PORT = serial.Serial("COM2",9600)
-                        Serial_PORT.timeout = 0.05  # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
-                        self.signalChangeStateFrontEnd.emit("USB", "Good")
-                        self.timerActualGraf.start(1 * QTIMER_SECOND)  # Arranque al timer de actualización gráfica
+                    try:
+                        if Serial_PORT.is_open == False:
+                            Serial_PORT = serial.Serial("COM2",9600)
+                            Serial_PORT.timeout = 0.05  # Timeout de lectura en segundos (50 mS) | Tiempo máx = (18 (Bytes) * 1 / 9600) ≈ 0.00187 seg
+                            self.signalChangeStateFrontEnd.emit("USB", "Good")
+                            self.timerActualGraf.start(1 * QTIMER_SECOND)  # Arranque al timer de actualización gráfica
+                    except:
+                        self.signalChangeStateFrontEnd.emit("USB", "Bad")
                 else:
                     for USB_Port in Device_To_Found:
                         try:
@@ -700,9 +703,10 @@ if __name__ == "__main__":
     app = QGuiApplication(sys.argv)
     engine = QQmlApplicationEngine()
 
-    #Obtención del contexto del objeto desde la interface gráfica
-    objBackend = classBackend()
-    engine.rootContext().setContextProperty("backendPython",objBackend)
+    # Instancia de objetos backend
+    objBackend = classBackendTrackingPage()
+
+    engine.rootContext().setContextProperty("backendTrackingPage",objBackend)
 
     #Carga del archivo QML
     engine.load(os.fspath(Path(__file__).resolve().parent / "qml\main.qml"))

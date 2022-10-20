@@ -4,22 +4,25 @@ import QtQuick.Controls 2.15
 Page{
     id: homepage
 
+    property string colorBackgroundPage: "#2c313b"
+    property string colorBackgroundContainer: "#9f9f9f"
+    property string colorForegroundTitle: "#26282a"
+    property string colorForegroundText: "#ffffff"
+
     Rectangle{
         id: backGroundPage
-        color: "#2c313b"
+        color: colorBackgroundPage
         anchors.fill: parent
         anchors.rightMargin: 0
         anchors.bottomMargin: 0
         anchors.leftMargin: 0
         anchors.topMargin: 0
 
-
-
         Rectangle {
             id: rectangle2
             x: 726
             width: 472
-            color: "#ffffff"
+            color: colorBackgroundContainer
             radius: 15
             border.width: 3
             anchors.right: parent.right
@@ -45,7 +48,7 @@ Page{
                 id: backgroundPresentacion
                 width: columnPresentacion.width
                 height: 5*columnPresentacion.width/12 - columnPresentacion.spacing/2 - columnPresentacion.anchors.bottomMargin
-                color: "#9f9f9f"
+                color: colorBackgroundContainer
                 radius:15
                 border.width: 3
 
@@ -82,7 +85,7 @@ Page{
                     anchors.bottomMargin: 20
                     font.bold: true
                     font.pointSize: (mensajePresentacion.height + mensajePresentacion.width)/60
-                    color: "#ffffff"
+                    color: colorForegroundText
                 }
             }
 
@@ -90,7 +93,7 @@ Page{
                 id: rectangle1
                 width: parent.width
                 height: 7*columnPresentacion.width/12 - columnPresentacion.spacing/2 - columnPresentacion.anchors.bottomMargin
-                color: "#ffffff"
+                color: colorBackgroundContainer
                 radius: 15
                 border.width: 3
             }
@@ -102,6 +105,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:0.66;height:608;width:1218}D{i:2}
+    D{i:0;autoSize:true;formeditorZoom:0.75;height:608;width:1218}
 }
 ##^##*/

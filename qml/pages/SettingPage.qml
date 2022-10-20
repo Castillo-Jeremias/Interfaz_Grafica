@@ -6,9 +6,23 @@ import "../controls"
 Page{
     id: id_setting_page
 
+    QtObject{
+        id:internal
+
+        function getTime(){
+            return Qt.formatDateTime(new Date(),"dd/MM/yy  hh:mm:ss")
+        }
+
+    }
+
+    property string colorBackgroundPage: "#2c313b"
+    property string colorBackgroundContainer: "#9f9f9f"
+    property string colorForegroundTitle: "#26282a"
+    property string colorForegroundText: "#ffffff"
+
     Rectangle {
         id: backGroundPage
-        color: "#3b0b07"
+        color: colorBackgroundPage
         anchors.fill: parent
         anchors.rightMargin: 0
         anchors.bottomMargin: 0
@@ -18,9 +32,10 @@ Page{
         Rectangle {
             id: backGroundSettingTracking
             radius: 15
+            border.width: 3
             implicitWidth: 541
             implicitHeight:  588
-            color: "#ffffff"
+            color: colorBackgroundContainer
             anchors.left: parent.left
             anchors.right: backGroundNumber1.left
             anchors.top: parent.top
@@ -32,20 +47,28 @@ Page{
 
             Rectangle {
                 id: containerComandosToShow
-                color: "#ffffff"
+                color: "#00000000"
                 anchors.fill: parent
-                anchors.rightMargin: 3
-                anchors.leftMargin: 3
-                anchors.bottomMargin: 3
-                anchors.topMargin: 3
+                anchors.rightMargin: 5
+                anchors.leftMargin: 5
+                anchors.bottomMargin: 5
+                anchors.topMargin: 5
 
                 ScrollView {
                     id: scrollViewVentanaComandosToShow
                     anchors.fill: parent
+                    anchors.topMargin: 4
+                    anchors.rightMargin: 0
+                    anchors.bottomMargin: 3
+                    anchors.leftMargin: 15
+
                     font.pointSize: 15
                     font.italic: true
+
+                    clip: true
+                    wheelEnabled: true
                     TextEdit{
-                        id: ventanaComandosToShow
+                        id: ventanaLogComandos
                         anchors.fill: parent
                         cursorVisible: true
 
@@ -65,10 +88,11 @@ Page{
 
         Rectangle {
             id: backGroundNumber1
-            color: "#ffffff"
+            color: colorBackgroundContainer
             implicitHeight: 280
             implicitWidth: 588
             radius:15
+            border.width: 3
 
             anchors.left: parent.left
             anchors.right: parent.right
@@ -76,29 +100,17 @@ Page{
             anchors.leftMargin: 605
             anchors.topMargin: 10
             anchors.rightMargin: 25
-
-
-            Label {
-                id: label
-                x: 8
-                y: 8
-                text: qsTr("Configuración - Puerto Serie")
-                font.italic: true
-                font.bold: true
-                font.pointSize: 20
-            }
-
-
         }
     }
 
     Rectangle {
         id: backGroundNumber2
-        color: "#ffffff"
+        color: colorBackgroundContainer
 
         implicitHeight: 280
         implicitWidth: 588
         radius:15
+        border.width: 3
 
         anchors.left: parent.left
         anchors.right: parent.right
@@ -108,36 +120,6 @@ Page{
         anchors.leftMargin: 605
         anchors.bottomMargin: 10
         anchors.rightMargin: 25
-
-        Button {
-            id: button
-            x: 29
-            y: 39
-            text: qsTr("Generar Formato")
-
-            FileDialog{
-                id:fileOpen
-                title: "Cargue el archivo"
-                folder: shortcuts.home
-                nameFilters: ["Text File (*.txt)"]
-                selectMultiple: false
-                onAccepted:{
-                    // Si todo correcto una vez determinara la ruta, enviamos los datos del backgroundLo
-                    // junto con la dirección URL seleccionada por el usuario (Si decide hacerlo)
-                    backendPython.chargeThisFile(fileOpen.fileUrl)
-                }
-            }
-
-            onClicked: {
-                fileOpen.open()
-            }
-
-        }
-    }
-
-    Connections{
-        target: backendPython
-
     }
 }
 
@@ -147,6 +129,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;height:608;width:1218}D{i:4;invisible:true}
+    D{i:0;autoSize:true;formeditorZoom:0.9;height:608;width:1218}
 }
 ##^##*/
