@@ -48,27 +48,31 @@ Page{
 
         function sendCommandToBackend(btnClicked){
             switch(btnClicked){
-            case btnArriba:
-                backendTrackingPage.moveUp()
-                break
+                case btnArriba:
+                    backendTrackingPage.moveUp()
+                    break
 
-            case btnAbajo:
-                backendTrackingPage.moveDown()
-                break
+                case btnAbajo:
+                    backendTrackingPage.moveDown()
+                    break
 
-            case btnIzquierda:
-                backendTrackingPage.moveToLeft()
-                break
+                case btnIzquierda:
+                    backendTrackingPage.moveToLeft()
+                    break
 
-            case btnDerecha:
-                backendTrackingPage.moveToRight()
-                break
+                case btnDerecha:
+                    backendTrackingPage.moveToRight()
+                    break
 
-            case btnStop:
-                backendTrackingPage.stopEverthing()
-                break
+                case btnStop:
+                    backendTrackingPage.stopEverthing()
+                    break
 
+                case btnCalibrar:
+                    backendTrackingPage.calibarAntena()
+                    break
             }
+
         }
 
         function iniciar_Tracking(){
@@ -487,6 +491,32 @@ Page{
 
                     onPressed: {
                         internal.sendCommandToBackend(btnStop)
+                    }
+
+                    onReleased: {
+                        checkBoxManual.checkable = true
+                        checkBoxManual.checked = false
+                    }
+                }
+
+                ButtonTracking {
+                    id: btnCalibrar
+                    x: 237
+                    width: 118
+                    height: 34
+                    text: "Calibrar"
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.rightMargin: 152
+                    font.italic: true
+                    shadowVertical: 5
+                    font.bold: true
+                    font.pointSize: 10
+                    shadowHorizontal: 5
+                    anchors.topMargin: 8
+
+                    onPressed: {
+                        internal.sendCommandToBackend(btnCalibrar)
                     }
 
                     onReleased: {
@@ -923,7 +953,7 @@ Page{
                         anchors.rightMargin: 30
 
                         Rectangle {
-                            id: rectangle2
+                            id: ledHomeAcimut
                             x: 181
                             width: 50
                             height: 20
@@ -937,7 +967,7 @@ Page{
                         }
 
                         Rectangle {
-                            id: rectangle3
+                            id: ledHomeElevacion
                             x: 181
                             y: 34
                             width: 50
@@ -1136,26 +1166,44 @@ Page{
             switch (msgCode){
 
                 case "C0":
+                    internal.defaultStateApp()
+                    break;
+
+                case "C1":
                     backendTrackingPage.stopTracking()
                     internal.defaultStateApp()
                     internal.disableAllButtons()
                     break;
 
-                case "C1":
-                    internal.defaultStateApp()
-                    break;
-
-                case "C-1":
+                case "C2":
                     // ACA PODEMOS PONER ALGO DE AVISO EN ALGUNA LUZ O ALGO QUE SE YO
                     break;
             }
         }
 
+        function onSignalHomeStop(msgCode){
+            switch(msgCode){
+            case "HA":
+                // Dummy comment
+                break;
+            case "HE":
+                // Dummy comment
+                break;
+            }
+        }
+
+        function onSignalCalibrar(msgCode){
+            switch(msgCode){
+            case "H":
+                ventanaLog.append(internal.getTime()+ " --- " + msgCode)
+
+            }
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;height:608;width:1218}
+    D{i:0;formeditorZoom:0.5;height:608;width:1218}D{i:27}
 }
 ##^##*/

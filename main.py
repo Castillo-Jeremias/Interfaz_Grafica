@@ -77,7 +77,7 @@ Serial_PORT = serial.Serial()
 
 boolTracking_Enable = False
 
-boolDEBUG = True
+boolDEBUG = False
 
 #############################################################################################################
 #                                                Fin Constantes                                             #
@@ -131,6 +131,8 @@ class classBackendTrackingPage(QObject):
     signalTracking = Signal(str)
 
     signalCalibration = Signal(str)
+
+    signalHomeStop = Signal(str)
     #############################################################################################################
     #                                        Fin Señales a emitir                                               #
     #############################################################################################################
@@ -267,7 +269,7 @@ class classBackendTrackingPage(QObject):
 
     def getDataofTracking(self,objFileLocal):
 
-        strMaskTarget   = "Target body name:"
+        strMaskTarget   = "Target body name: "
         strMaskStart    = "Start time      :"
         strMaskStop     = "Stop  time      :"
 
@@ -449,6 +451,16 @@ class classBackendTrackingPage(QObject):
             self.signalTracking.emit("Stop")
         self.Enviar_Comando(cmd)
         self.signalCommSerieFailed.emit("[Parada Global]: Deteniendo Movimientos")
+
+    @Slot()
+    def calibarAntena(self):
+        #comando a enviar: "S\r"
+        cmd = 'H\r'
+        if boolTracking_Enable == True:
+            #self.signalTrackingStopped.emit()
+            self.signalCalibration.emit("H")
+        self.Enviar_Comando(cmd)
+        self.signalCommSerieFailed.emit("[Calibración]: Calibrando Antena")
 
     #############################################################################################################
     #                                         Fin comando manuales                                              #
@@ -640,30 +652,32 @@ class classBackendTrackingPage(QObject):
                         #print("Lectura de puerto serie Manual: " + Data_From_MCU)
                         # ======================= FOR DEBUGGING =======================#
                         if Data_From_MCU == END_COMMAND:
+                            # Se observa una recepción periodica constantemente cuando esta la placa conectada.
+                            # Ver y definir que hacer
                             self.signalChangeStateFrontEnd.emit("USB - RX", "Good")     #Recepción de comando OK
+                            pass
                         elif Data_From_MCU == '?>' + END_COMMAND:
                             self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")  #Recepción de comando NOT OK
                         else:
                             self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")      #Error (?)
 
                     elif Data_From_MCU[0] == 'C':
-
                         Data_Split = Data_From_MCU.split(END_COMMAND)
                         # Una vez realizado el split tenemos la información de la siguiente manera:
-                        #   Data_Split = ['Cx', '']   ---  x : Valor entero posible -1, 0, 1.
+                        #   Data_Split = ['Cx', '']   ---  x : Valor entero posible 0, 1, 2.
                         #   Index list   | 0  | 1 |
 
                         Data_Command = Data_Split[0]
 
                         if Data_Command == 'C0':
-                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Iniciada")
+                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Finalizada")
                             self.signalCalibration.emit('C0')
                         elif Data_Command == 'C1':
-                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Finalizada")
+                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración Iniciada")
                             self.signalCalibration.emit('C1')
-                        elif Data_Command == 'C-1':
+                        elif Data_Command == 'C2':
                             self.signalCommBackFront.emit("[Recepcion_Datos()]: Error de Calibración")
-                            self.signalCalibration.emit('C-1')
+                            self.signalCalibration.emit('C2')
                         else:
                             self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración no Identificada")
                             # TO DO (Definir que hacer aca)
@@ -681,6 +695,7 @@ class classBackendTrackingPage(QObject):
                             #                |  Data Command     |End|
 
                         Data_Command = Data_Split[0].split(',')
+
                         # Data_Command = ['A', '135.01', 'E', '150.05', '']
                         # Index list     | 0 |    1    |  2 |    3    | 4 |
 
@@ -691,6 +706,21 @@ class classBackendTrackingPage(QObject):
                             #self.signalChangeStateFrontEnd.emit("USB - RX", "Good")     #Recepción de comando OK
                         else:
                             #self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")  #Recepción de comando NOT OK
+                            pass
+                    elif Data_From_MCU[0] == 'H':
+                        Data_Split = Data_From_MCU.split(END_COMMAND)
+                        # Una vez realizado el split tenemos la información de la siguiente manera:
+                        #   Data_Split = ['Hx', '']   ---  x : Valor posible A (Acimut), E (Elevación).
+                        #   Index list   | 0  | 1 |
+
+                        Data_Command = Data_Split[0]
+                        if Data_Command == 'HA':
+                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Home de Acimut Detectado")
+                            #self.signalHomeStop('HA')
+                            pass
+                        elif Data_Command == 'HE':
+                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Home de Elevación Detectado")
+                            #self.signalHomeStop('HE')
                             pass
                     else:
                         self.signalCommBackFront.emit("[Recepcion_Datos()]: Mensaje o Comando No Identificado")
