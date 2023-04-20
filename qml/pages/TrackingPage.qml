@@ -115,6 +115,7 @@ Page{
             btnContinuarTracking.enabled = false
             checkBoxManual.checked = false
             checkBoxManual.checkable = true
+            btnCalibrar.enabled = true
             labelFin.dataTxt = "- - -"
             labelInicio.dataTxt = "- - -"
             labelObjetivo.dataTxt = "- - -"
@@ -127,6 +128,12 @@ Page{
             btnContinuarTracking.enabled = false
             checkBoxManual.checked = true
             checkBoxManual.checkable = false
+            btnCalibrar.enabled = false
+        }
+
+        function disableAngles(){
+            labelEstActElevacion.dataTxt = "Calibrando . . ."
+            labelEstActAcimut.dataTxt = "Calibrando . . ."
         }
 
     }
@@ -277,7 +284,7 @@ Page{
 
                             FileDialog{
                                 id:fileOpen
-                                title: "Cargue el archivo"
+                                title: "Seleccione el archivo"
                                 folder: shortcuts.home
                                 nameFilters: ["Text File (*.txt)"]
                                 selectMultiple: false
@@ -517,11 +524,7 @@ Page{
 
                     onPressed: {
                         internal.sendCommandToBackend(btnCalibrar)
-                    }
-
-                    onReleased: {
-                        checkBoxManual.checkable = true
-                        checkBoxManual.checked = false
+                        btnCalibrar.enabled = false
                     }
                 }
             }
@@ -926,12 +929,12 @@ Page{
                         stepSize: 0.1
 
                         style: CircularGaugeStyle{
+                            id: defaultGaugeStyle
                             //tickmarkLabel: null     // Label que viene por defecto OFF
                             minimumValueAngle: -180
                             maximumValueAngle : 180
                             minorTickmarkCount: 4
                             labelStepSize: 20
-
                             tickmarkLabel: Text{
                                 text: styleData.value
                                 color: "#ffffff"
@@ -1173,11 +1176,15 @@ Page{
                     backendTrackingPage.stopTracking()
                     internal.defaultStateApp()
                     internal.disableAllButtons()
+                    internal.disableAngles()
                     break;
 
                 case "C2":
-                    // ACA PODEMOS PONER ALGO DE AVISO EN ALGUNA LUZ O ALGO QUE SE YO
+                    // Casp de timepout de calibración
                     break;
+
+                case "C3":
+                    internal.detenerTracking()
             }
         }
 
@@ -1204,6 +1211,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5;height:608;width:1218}D{i:27}
+    D{i:0;formeditorZoom:0.9;height:608;width:1218}
 }
 ##^##*/

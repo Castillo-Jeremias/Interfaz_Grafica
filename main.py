@@ -156,7 +156,7 @@ class classBackendTrackingPage(QObject):
 
         # Recarga de timer asociados
         self.timerAutoSave.start(1 * QTIMER_MINUTE)
-        self.timerCheckPorts.start(0 * QTIMER_SECOND)
+        self.timerCheckPorts.start(5 * QTIMER_SECOND)
         self.timerCheckRX.start(0 * QTIMER_SECOND)
 
         # Configuraciónes Especiales
@@ -216,7 +216,8 @@ class classBackendTrackingPage(QObject):
         self.listDataCommands.append(strCmd)
 
     def clearListCommands(self):
-        self.listDataCommands.clear
+        self.listDataCommands.clear()
+        self.signalCommBackFront.emit("Limpiando Datos de Tracking Antiguos")
 
     def setDataFormatCSV(self,objFileLocal):
         strMarcaInicio = '$$SOE\n'
@@ -456,6 +457,7 @@ class classBackendTrackingPage(QObject):
     def calibarAntena(self):
         #comando a enviar: "S\r"
         cmd = 'H\r'
+
         if boolTracking_Enable == True:
             #self.signalTrackingStopped.emit()
             self.signalCalibration.emit("H")
@@ -527,6 +529,13 @@ class classBackendTrackingPage(QObject):
 
                         fDataAcimut = float(listCmdAct[2])
                         fDataElevacion = float(listCmdAct[3])
+
+                        #Límites de movimientos en elevación [45° ~ 90°]
+                        if(fDataElevacion <= 45.0):
+                            fDataElevacion = 45.0
+                        elif(fDataElevacion >= 90.0):
+                            fDataElevacion = 90.0
+
                         sCmd = "P" + str(fDataAcimut) + " " + str(fDataElevacion) + "\r"
                         self.Enviar_Comando(sCmd)
 
@@ -678,6 +687,9 @@ class classBackendTrackingPage(QObject):
                         elif Data_Command == 'C2':
                             self.signalCommBackFront.emit("[Recepcion_Datos()]: Error de Calibración")
                             self.signalCalibration.emit('C2')
+                        elif Data_Command == 'C3':
+                            self.signalCommBackFront.emit("[Recepcion_Datos()]: Parada de Emergencia Detectada")
+                            self.signalCalibration.emit('C3')
                         else:
                             self.signalCommBackFront.emit("[Recepcion_Datos()]: Secuencia de Calibración no Identificada")
                             # TO DO (Definir que hacer aca)
