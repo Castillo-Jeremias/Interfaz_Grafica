@@ -21,8 +21,8 @@ Window {
     minimumWidth:  1300
 
     //Máxima resolución de escritorio tolerada
-    maximumHeight: 1080
-    maximumWidth: 1920
+    maximumHeight: 700
+    maximumWidth: 1300
 
     // Removemos bordes de de aplicación de Windows
     flags: Qt.Window | Qt.FramelessWindowHint
@@ -446,6 +446,7 @@ Window {
                         id: btnSettings
                         y: 485
                         width: leftBar.width
+                        visible: false
                         text: qsTr("Setting")
                         anchors.left: parent.left
                         anchors.bottom: parent.bottom
@@ -659,6 +660,6 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.5}
+    D{i:0;formeditorZoom:0.66}
 }
 ##^##*/

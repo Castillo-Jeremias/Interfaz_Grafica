@@ -69,7 +69,8 @@ Dict_Text_Commands = {
     'R' : '[moveToRight()]',
     'A' : '[stopAcimut()]',
     'E' : '[stopElevacion()]',
-    'S' : '[stopEverthing()]'
+    'S' : '[stopEverthing()]',
+    'H' : '[calibarAntena()]'
 }
 
 # Instanciación de Puerto Serie, a la espera de una conexión.
@@ -77,7 +78,7 @@ Serial_PORT = serial.Serial()
 
 boolTracking_Enable = False
 
-boolDEBUG = False
+boolDEBUG = True
 
 #############################################################################################################
 #                                                Fin Constantes                                             #
@@ -376,7 +377,7 @@ class classBackendTrackingPage(QObject):
                                     self.signalCommSerieFailed.emit("[statusPortCOM()]: Intentando Conectar Dispositivo a través del Puerto " + USB_Port.device + "...")
                                     self.signalChangeStateFrontEnd.emit("USB - TX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
                                     self.signalChangeStateFrontEnd.emit("USB - RX", "")     # Reset necesario por si tocan botones manuales sin conexión con dispositivo
-                                    self.timerActualGraf.start(0.25 * QTIMER_SECOND)        # Arranque al timer de actualización gráfica
+                                    self.timerActualGraf.start(1 * QTIMER_SECOND)           # Arranque al timer de actualización gráfica
                                 except:
                                     self.signalCommSerieFailed.emit("[statusPortCOM()]: ¡El puerto " + USB_Port.device + " esta siendo usado por otro dispositivo!")
                                     Serial_PORT.close()  # Just in case . . .
@@ -669,8 +670,8 @@ class classBackendTrackingPage(QObject):
                             self.signalChangeStateFrontEnd.emit("USB - RX", "Problem")  #Recepción de comando NOT OK
                         else:
                             self.signalChangeStateFrontEnd.emit("USB - RX", "Bad")      #Error (?)
-
                     elif Data_From_MCU[0] == 'C':
+
                         Data_Split = Data_From_MCU.split(END_COMMAND)
                         # Una vez realizado el split tenemos la información de la siguiente manera:
                         #   Data_Split = ['Cx', '']   ---  x : Valor entero posible 0, 1, 2.

@@ -28,6 +28,7 @@ Page{
             btnArriba.enabled = false
             btnIzquierda.enabled = false
             btnDerecha.enabled = false
+            btnCalibrar.enabled = false
         }
 
         function enableManualButtons(){
@@ -35,6 +36,7 @@ Page{
             btnArriba.enabled = true
             btnIzquierda.enabled = true
             btnDerecha.enabled = true
+            btnCalibrar.enabled = true
         }
 
         function showNothingdataTxt(){
@@ -224,7 +226,7 @@ Page{
                             shadowVertical: 5
                             shadowHorizontal: 5
                             dataTxt: " - - - "
-                            altotxt: 12
+                            altotxt: 10
                             radius_label: (coloumnTracking.height-2*coloumnTracking.spacing)/12
                         }
 
@@ -236,7 +238,7 @@ Page{
                             shadowVertical: 5
                             shadowHorizontal: 5
                             dataTxt: " - - - "
-                            altotxt: 12
+                            altotxt: 10
                             radius_label: (coloumnTracking.height-2*coloumnTracking.spacing)/12
                         }
 
@@ -248,7 +250,7 @@ Page{
                             shadowVertical: 5
                             shadowHorizontal: 5
                             dataTxt: " - - - "
-                            altotxt: 12
+                            altotxt: 10
                             radius_label: (coloumnTracking.height-2*coloumnTracking.spacing)/12
                         }
                     }
@@ -524,7 +526,6 @@ Page{
 
                     onPressed: {
                         internal.sendCommandToBackend(btnCalibrar)
-                        btnCalibrar.enabled = false
                     }
                 }
             }
@@ -682,7 +683,7 @@ Page{
                         anchors.right: parent.right
                         anchors.top: parent.top
 
-                        anchors.rightMargin: 290
+                        anchors.rightMargin: 427
                         anchors.leftMargin: 15
                         anchors.topMargin: 10
 
@@ -747,13 +748,13 @@ Page{
                             border.width: 2
                             anchors.left: parent.left
                             anchors.top: parent.top
-                            anchors.topMargin: 3
-                            anchors.leftMargin: 20
+                            anchors.topMargin: 6
+                            anchors.leftMargin: 42
                         }
 
                         Rectangle {
                             id: statusCommUSB
-                            y: 28
+                            y: 30
                             width: 50
                             height: 20
                             color: "#282828"
@@ -761,25 +762,25 @@ Page{
                             border.width: 2
                             anchors.left: parent.left
                             anchors.bottom: parent.bottom
-                            anchors.bottomMargin: 3
-                            anchors.leftMargin: 20
+                            anchors.bottomMargin: 0
+                            anchors.leftMargin: 42
                         }
 
                         Text {
                             id: text1
-                            x: 85
+                            x: 125
                             height: 20
                             text: qsTr("Tracking")
                             anchors.top: parent.top
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            anchors.topMargin: 3
+                            anchors.topMargin: 6
                         }
 
                         Text {
                             id: text2
-                            x: 84
+                            x: 124
                             y: 30
                             height: 20
                             text: "Conex. con Dispositivo"
@@ -787,13 +788,13 @@ Page{
                             font.pixelSize: 12
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
-                            anchors.bottomMargin: 3
+                            anchors.bottomMargin: 0
                             minimumPixelSize: 12
                         }
 
                         Rectangle {
                             id: statusCommRX
-                            y: 27
+                            y: 30
                             width: 50
                             height: 20
                             color: "#282828"
@@ -801,14 +802,14 @@ Page{
                             border.width: 2
                             anchors.left: parent.left
                             anchors.bottom: parent.bottom
-                            anchors.leftMargin: 249
-                            anchors.bottomMargin: 3
+                            anchors.leftMargin: 348
+                            anchors.bottomMargin: 0
                         }
 
                         Text {
                             id: statePortRX_Text
-                            x: 315
-                            y: 27
+                            x: 432
+                            y: 30
                             height: 20
                             text: "USB - Recepción"
                             anchors.bottom: parent.bottom
@@ -816,12 +817,12 @@ Page{
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             minimumPixelSize: 12
-                            anchors.bottomMargin: 3
+                            anchors.bottomMargin: 0
                         }
 
                         Rectangle {
                             id: statusCommTX
-                            y: 3
+                            y: 6
                             width: 50
                             height: 20
                             color: "#282828"
@@ -829,14 +830,14 @@ Page{
                             border.width: 2
                             anchors.left: parent.left
                             anchors.bottom: parent.bottom
-                            anchors.leftMargin: 249
-                            anchors.bottomMargin: 27
+                            anchors.leftMargin: 348
+                            anchors.bottomMargin: 24
                         }
 
                         Text {
                             id: statePortTX_Text
-                            x: 315
-                            y: 3
+                            x: 432
+                            y: 6
                             height: 20
                             text: "USB - Transmisión"
                             anchors.bottom: parent.bottom
@@ -844,8 +845,26 @@ Page{
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
                             minimumPixelSize: 12
-                            anchors.bottomMargin: 27
+                            anchors.bottomMargin: 24
                         }
+                    }
+
+                    Text {
+                        id: text5
+                        x: 277
+                        width: 354
+                        height: 34
+                        color: "#26282a"
+                        text: "Longitud:  - 60º 36' 44'' l Latitud:  - 32º 52' 18\""
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        font.pixelSize: 15
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        anchors.rightMargin: 20
+                        font.italic: true
+                        font.bold: true
+                        anchors.topMargin: 10
                     }
 
                 }
@@ -885,19 +904,19 @@ Page{
                         anchors.topMargin: 40
 
                         //Máximo valor y minímo de la escala a representar
-                        maximumValue: 180
+                        maximumValue: 90
                         minimumValue: 0
 
                         //Minímo offset de valor para mover la aguja del gauge
                         stepSize: 0.1
 
-                        value: 90
+                        value: 45
                         style: CircularGaugeStyle{
                             //tickmarkLabel: null     // Label que viene por defecto OFF
                             minimumValueAngle: -90
                             maximumValueAngle : 90
                             minorTickmarkCount: 4
-                            labelStepSize: 20
+                            labelStepSize: 10
 
                             tickmarkLabel: Text{
                                 text: styleData.value
@@ -949,6 +968,7 @@ Page{
                         y: 257
                         width: 197
                         height: 57
+                        visible: false
                         color: "#00000000"
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
@@ -1203,7 +1223,6 @@ Page{
             switch(msgCode){
             case "H":
                 ventanaLog.append(internal.getTime()+ " --- " + msgCode)
-
             }
         }
     }
@@ -1211,6 +1230,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:0.9;height:608;width:1218}
+    D{i:0;height:608;width:1218}D{i:51}D{i:53}
 }
 ##^##*/

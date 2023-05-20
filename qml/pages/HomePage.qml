@@ -31,6 +31,16 @@ Page{
             anchors.topMargin: 10
             anchors.bottomMargin: 10
             anchors.rightMargin: 20
+
+            Image {
+                id: image1
+                x: 8
+                y: 8
+                width: 456
+                height: 572
+                source: "../../images/imagenes/WhatsApp Image 2023-04-24 at 13.18.13.jpeg"
+                fillMode: Image.Stretch
+            }
         }
 
         Column {
@@ -96,6 +106,16 @@ Page{
                 color: colorBackgroundContainer
                 radius: 15
                 border.width: 3
+
+                Image {
+                    id: image
+                    x: 8
+                    y: 8
+                    width: 593
+                    height: 304
+                    source: "../../images/imagenes/groundstationcontroller.png"
+                    fillMode: Image.Stretch
+                }
             }
         }
 
@@ -105,6 +125,6 @@ Page{
 
 /*##^##
 Designer {
-    D{i:0;autoSize:true;formeditorZoom:0.75;height:608;width:1218}
+    D{i:0;autoSize:true;formeditorZoom:0.9;height:608;width:1218}D{i:9}
 }
 ##^##*/
